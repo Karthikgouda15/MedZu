@@ -46,6 +46,19 @@ export const getPharmacies = async (req, res, next) => {
   }
 };
 
+export const getPharmacyById = async (req, res, next) => {
+  try {
+    const pharmacy = await Pharmacy.findById(req.params.id).populate('user', 'name email phone status createdAt');
+    if (!pharmacy) throw new AppError('Pharmacy not found', 404);
+    const requestCount = await MedicineRequest.countDocuments({
+      $or: [{ requesterPharmacy: pharmacy._id }, { supplierPharmacy: pharmacy._id }],
+    });
+    res.json({ success: true, data: { ...pharmacy.toObject(), requestCount } });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updatePharmacyStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
@@ -120,7 +133,15 @@ export const getMedicines = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, search } = req.query;
     const skip = (page - 1) * limit;
-    const filter = search ? { $text: { $search: search } } : {};
+    let filter = {};
+    if (search) {
+      const escapedQuery = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      filter.$or = [
+        { name: { $regex: escapedQuery, $options: 'i' } },
+        { manufacturer: { $regex: escapedQuery, $options: 'i' } },
+        { category: { $regex: escapedQuery, $options: 'i' } },
+      ];
+    }
 
     const [data, total] = await Promise.all([
       Medicine.find(filter).skip(skip).limit(Number(limit)).sort({ name: 1 }),
@@ -172,7 +193,8 @@ export const getAllRequests = async (req, res, next) => {
 
     const [data, total] = await Promise.all([
       MedicineRequest.find(filter)
-        .populate('requesterPharmacy supplierPharmacy distributor medicine')
+        .populate('requesterPharmacy supplierPharmacy medicine')
+        .populate({ path: 'distributor', populate: { path: 'user' } })
         .skip(skip)
         .limit(Number(limit))
         .sort({ createdAt: -1 }),

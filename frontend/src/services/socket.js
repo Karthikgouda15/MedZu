@@ -1,11 +1,19 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5004';
 
 let socket = null;
 
 export const connectSocket = (token) => {
-  if (socket?.connected) return socket;
+  if (socket) {
+    if (socket.auth.token !== token) {
+      socket.auth.token = token;
+      if (socket.connected) {
+        socket.disconnect().connect();
+      }
+    }
+    return socket;
+  }
 
   socket = io(SOCKET_URL, {
     auth: { token },

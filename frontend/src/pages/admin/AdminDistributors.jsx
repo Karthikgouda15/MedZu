@@ -12,7 +12,7 @@ export default function AdminDistributors() {
 
   const fetch = async () => {
     try {
-      const { data } = await api.get('/admin/distributors');
+      const { data } = await api.get('/admin/distributors?limit=1000');
       setDistributors(data.data || []);
     } catch (err) {
       console.error('Failed to fetch distributors:', err);
@@ -22,7 +22,11 @@ export default function AdminDistributors() {
     }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetch();
+    });
+  }, []);
 
   const updateStatus = async (id, status) => {
     try {
@@ -59,14 +63,14 @@ export default function AdminDistributors() {
     )},
     { key: 'status', label: 'Status', render: (r) => (
       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold border ${
-        r.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-        r.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+        r.user?.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+        r.user?.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
         'bg-rose-50 text-rose-700 border-rose-200'
       }`}>
-        {r.status === 'active' ? <CheckCircle2 className="h-3.5 w-3.5" /> : 
-         r.status === 'pending' ? <ShieldAlert className="h-3.5 w-3.5" /> : 
+        {r.user?.status === 'active' ? <CheckCircle2 className="h-3.5 w-3.5" /> : 
+         r.user?.status === 'pending' ? <ShieldAlert className="h-3.5 w-3.5" /> : 
          <X className="h-3.5 w-3.5" />}
-        <span className="capitalize">{r.status}</span>
+        <span className="capitalize">{r.user?.status || 'N/A'}</span>
       </span>
     )},
     {
@@ -74,7 +78,7 @@ export default function AdminDistributors() {
       label: 'Actions',
       render: (r) => (
         <div className="flex gap-2">
-          {r.status !== 'active' && (
+          {r.user?.status !== 'active' && (
             <button
               onClick={() => updateStatus(r._id, 'active')}
               className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100"
@@ -83,7 +87,7 @@ export default function AdminDistributors() {
               <Check className="h-4 w-4" />
             </button>
           )}
-          {r.status !== 'rejected' && r.status !== 'pending' && (
+          {r.user?.status !== 'rejected' && (
             <button
               onClick={() => updateStatus(r._id, 'rejected')}
               className="rounded-lg bg-rose-50 p-2 text-rose-600 transition-colors hover:bg-rose-100"

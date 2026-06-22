@@ -7,7 +7,6 @@ const SocketContext = createContext(null);
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [connected, setConnected] = useState(false);
-  const [listeners] = useState(() => new Map());
 
   useEffect(() => {
     if (!user) return;
@@ -20,7 +19,9 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
-    setConnected(socket.connected);
+    Promise.resolve().then(() => {
+      setConnected(socket.connected);
+    });
 
     return () => {
       socket.off('connect', onConnect);
@@ -43,6 +44,7 @@ export const SocketProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSocket = () => {
   const ctx = useContext(SocketContext);
   if (!ctx) throw new Error('useSocket must be used within SocketProvider');

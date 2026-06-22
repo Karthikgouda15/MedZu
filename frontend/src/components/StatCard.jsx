@@ -9,14 +9,6 @@ const GRADIENTS = {
   purple: 'from-purple-500 to-violet-500',
 };
 
-const BG_COLORS = {
-  primary: 'bg-primary-50 border-primary-100',
-  blue: 'bg-blue-50 border-blue-100',
-  amber: 'bg-amber-50 border-amber-100',
-  rose: 'bg-rose-50 border-rose-100',
-  purple: 'bg-purple-50 border-purple-100',
-};
-
 export default function StatCard({ title, value, icon: Icon, color = 'primary', trend, trendValue, prefix = '', suffix = '' }) {
   const numValue = typeof value === 'number' ? value : parseFloat(String(value).replace(/[^0-9.-]/g, '')) || 0;
   const isString = typeof value === 'string' && isNaN(value);

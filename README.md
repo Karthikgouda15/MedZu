@@ -40,7 +40,7 @@ npm run seed    # Seed demo data
 npm run dev
 ```
 
-Backend runs at `http://localhost:5001` (port 5001 avoids macOS AirPlay conflict on 5000)
+Backend runs at `http://localhost:5004`
 
 ### 3. Frontend
 

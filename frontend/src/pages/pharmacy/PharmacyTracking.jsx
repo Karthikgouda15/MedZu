@@ -157,8 +157,17 @@ export default function PharmacyTracking() {
               <div className="space-y-6">
                 {TIMELINE_STEPS.map((step, i) => {
                   const isCompleted = currentIdx >= i;
+                  
+                  // Special case for 'Searching for distributor'
+                  const isSearching = selected.status === 'accepted' && step.id === 'distributor_assigned';
                   const isCurrent = currentIdx === i || (selected.status === 'pickup_started' && i === 1);
                   
+                  let label = step.label;
+                  if (isSearching) label = 'Searching for delivery partner...';
+                  if (isCompleted && step.id === 'distributor_assigned' && selected.distributor) {
+                    label = `Rider Assigned: ${selected.distributor.user.name} (${selected.distributor.user.vehicleNo})`;
+                  }
+
                   return (
                     <div key={step.id} className="relative flex gap-4">
                       {/* Connecting line */}
@@ -172,9 +181,13 @@ export default function PharmacyTracking() {
                       <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
                         isCompleted
                           ? 'border-primary-500 bg-primary-500 text-white shadow-sm shadow-primary-200'
+                          : isSearching 
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-500' 
                           : 'border-slate-200 bg-white text-slate-300'
                       }`}>
-                        {isCurrent ? (
+                        {isSearching ? (
+                          <div className="h-4 w-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+                        ) : isCurrent ? (
                           <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
                         ) : (
                           <step.icon className="h-4 w-4" />
@@ -184,9 +197,9 @@ export default function PharmacyTracking() {
                       {/* Step text */}
                       <div className="pt-1">
                         <p className={`text-sm font-semibold ${
-                          isCompleted ? 'text-slate-900' : 'text-slate-400'
+                          isCompleted ? 'text-slate-900' : isSearching ? 'text-emerald-600 animate-pulse' : 'text-slate-400'
                         }`}>
-                          {step.label}
+                          {label}
                         </p>
                       </div>
                     </div>

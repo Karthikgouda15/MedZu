@@ -15,7 +15,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 const navItems = [
   { path: '/pharmacy/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { path: '/pharmacy/inventory', label: 'Inventory', icon: Package },
-  { path: '/pharmacy/request', label: 'Request Medicine', icon: Search },
+  { path: '/pharmacy/request', label: 'Search Medicine', icon: Search },
   { path: '/pharmacy/incoming', label: 'Incoming Requests', icon: Inbox },
   { path: '/pharmacy/outgoing', label: 'Outgoing Requests', icon: Send },
   { path: '/pharmacy/tracking', label: 'Live Tracking', icon: MapPin },

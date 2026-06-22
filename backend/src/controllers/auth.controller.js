@@ -15,7 +15,7 @@ const buildTokens = (user) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, pharmacyName, address, latitude, longitude, licenseNumber, vehicleType } = req.body;
+    const { name, email, password, role, phone, pharmacyName, address, latitude, longitude, licenseNumber, vehicleType, vehicleNo } = req.body;
 
     if (!['pharmacy', 'distributor'].includes(role)) {
       throw new AppError('Invalid registration role', 400);
@@ -30,6 +30,7 @@ export const register = async (req, res, next) => {
       password,
       role,
       phone,
+      vehicleNo: role === 'distributor' ? vehicleNo : undefined,
       status: 'pending',
     });
 

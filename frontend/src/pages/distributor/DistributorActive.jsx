@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Package, Truck, Navigation, CheckCircle, MapPin, ArrowRight } from 'lucide-react';
 import api from '../../services/api';
@@ -20,26 +21,34 @@ const STEPS = [
 
 export default function DistributorActive() {
   const { subscribe } = useSocket();
+  const navigate = useNavigate();
   const [deliveries, setDeliveries] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
   const watchId = useRef(null);
 
-  const fetch = async () => {
-    try {
-      const { data } = await api.get('/distributor/active');
-      setDeliveries(data.data || []);
-      if (data.data?.length && !selected) setSelected(data.data[0]);
-    } catch (err) {
-      console.error('Failed to fetch active deliveries:', err);
-      setDeliveries([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const { data } = await api.get('/distributor/active');
+        setDeliveries(data.data || []);
+        setSelected((currSelected) => {
+          if (data.data?.length && !currSelected) return data.data[0];
+          return currSelected;
+        });
+      } catch (err) {
+        console.error('Failed to fetch active deliveries:', err);
+        setDeliveries([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => { fetch(); }, []);
+    Promise.resolve().then(() => {
+      fetch();
+    });
+  }, []);
 
   useEffect(() => {
     if (!selected) return;
@@ -63,6 +72,29 @@ export default function DistributorActive() {
     };
   }, [selected]);
 
+  useEffect(() => {
+    // Subscribe to status updates for real-time delivery progress
+    const events = ['pickup_started', 'medicine_picked', 'delivery_started', 'delivery_completed'];
+    const unsubs = events.map((event) =>
+      subscribe(event, (req) => {
+        if (req._id === selected?._id) {
+          setSelected(req);
+          // Refresh deliveries list
+          api.get('/distributor/active')
+            .then(({ data }) => {
+              const activeList = data.data || [];
+              setDeliveries(activeList);
+              const updated = activeList.find((d) => d._id === selected._id);
+              if (updated) setSelected(updated);
+            })
+            .catch(() => {});
+        }
+      })
+    );
+
+    return () => unsubs.forEach((u) => u());
+  }, [selected, subscribe]);
+
   const performAction = async (action) => {
     if (!selected || !action) return;
     const endpoints = {
@@ -73,11 +105,17 @@ export default function DistributorActive() {
     };
     try {
       await api.patch(`/distributor/requests/${selected._id}/${endpoints[action]}`);
-      toast.success('Status updated');
+      toast.success(action === 'delivered' ? 'Delivery completed! 🎉' : 'Status updated');
       const { data } = await api.get('/distributor/active');
-      setDeliveries(data.data);
-      const updated = data.data.find((d) => d._id === selected._id);
-      setSelected(updated || data.data[0] || null);
+      const activeList = data.data || [];
+      setDeliveries(activeList);
+      if (activeList.length > 0) {
+        const updated = activeList.find((d) => d._id === selected._id);
+        setSelected(updated || activeList[0] || null);
+      } else {
+        setSelected(null);
+        navigate('/distributor/dashboard');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     }

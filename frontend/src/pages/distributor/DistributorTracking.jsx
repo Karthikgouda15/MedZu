@@ -2,12 +2,14 @@ import { useEffect, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { MapPin, Navigation, Signal, SignalZero } from 'lucide-react';
 import api from '../../services/api';
+import { useSocket } from '../../contexts/SocketContext';
 import { emitLocation } from '../../services/socket';
 import TrackingMap from '../../components/TrackingMap';
 import PageHeader from '../../components/PageHeader';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function DistributorTracking() {
+  const { subscribe } = useSocket();
   const { profile } = useAuth();
   const [location, setLocation] = useState(null);
   const [tracking, setTracking] = useState(false);
@@ -38,6 +40,16 @@ export default function DistributorTracking() {
   useEffect(() => () => {
     if (watchId.current) navigator.geolocation.clearWatch(watchId.current);
   }, []);
+
+  useEffect(() => {
+    // Subscribe to distributor_assigned events for real-time assignment notifications
+    const unsub = subscribe('distributor_assigned', (data) => {
+      toast.success('New delivery assignment received!');
+      // Optionally navigate to active deliveries or show notification
+    });
+
+    return unsub;
+  }, [subscribe]);
 
   const coords = profile?.currentLocation?.coordinates;
 

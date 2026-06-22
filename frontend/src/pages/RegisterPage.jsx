@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     name: '', email: '', password: '', phone: '',
     pharmacyName: '', address: '', latitude: '12.9716', longitude: '77.5946',
-    licenseNumber: '', vehicleType: 'bike',
+    licenseNumber: '', vehicleType: 'bike', vehicleNo: '',
   });
 
   const update = (field, value) => setForm((f) => ({ ...f, [field]: value }));
@@ -181,14 +181,26 @@ export default function RegisterPage() {
             )}
 
             {role === 'distributor' && (
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-600">Vehicle Type</label>
-                <select value={form.vehicleType} onChange={(e) => update('vehicleType', e.target.value)} className="input-premium text-sm">
-                  <option value="bike">🏍️ Bike</option>
-                  <option value="scooter">🛵 Scooter</option>
-                  <option value="car">🚗 Car</option>
-                  <option value="van">🚐 Van</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Vehicle Type</label>
+                  <select value={form.vehicleType} onChange={(e) => update('vehicleType', e.target.value)} className="input-premium text-sm">
+                    <option value="bike">🏍️ Bike</option>
+                    <option value="scooter">🛵 Scooter</option>
+                    <option value="car">🚗 Car</option>
+                    <option value="van">🚐 Van</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Vehicle Number</label>
+                  <input
+                    value={form.vehicleNo}
+                    onChange={(e) => update('vehicleNo', e.target.value)}
+                    className="input-premium text-sm uppercase"
+                    placeholder="KA01AB1234"
+                    required
+                  />
+                </div>
               </div>
             )}
 

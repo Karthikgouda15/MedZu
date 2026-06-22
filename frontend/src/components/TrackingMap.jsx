@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -29,17 +29,19 @@ export default function TrackingMap({
   locationHistory = [],
   height = '400px',
 }) {
-  const [center, setCenter] = useState([12.9716, 77.5946]);
-
-  useEffect(() => {
+  const getCenter = () => {
     if (distributorLocation) {
-      setCenter([distributorLocation.latitude, distributorLocation.longitude]);
-    } else if (requester) {
-      setCenter([requester.latitude, requester.longitude]);
-    } else if (supplier) {
-      setCenter([supplier.latitude, supplier.longitude]);
+      return [distributorLocation.latitude, distributorLocation.longitude];
     }
-  }, [distributorLocation, supplier, requester]);
+    if (requester) {
+      return [requester.latitude, requester.longitude];
+    }
+    if (supplier) {
+      return [supplier.latitude, supplier.longitude];
+    }
+    return [12.9716, 77.5946];
+  };
+  const center = getCenter();
 
   const routePoints = [];
   if (supplier) routePoints.push([supplier.latitude, supplier.longitude]);

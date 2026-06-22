@@ -14,7 +14,7 @@ export default function AdminMedicines() {
 
   const fetch = async () => {
     try {
-      const { data } = await api.get('/admin/medicines');
+      const { data } = await api.get('/admin/medicines?limit=1000');
       setMedicines(data.data || []);
     } catch (err) {
       console.error('Failed to fetch medicines:', err);
@@ -24,7 +24,11 @@ export default function AdminMedicines() {
     }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetch();
+    });
+  }, []);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -50,9 +54,9 @@ export default function AdminMedicines() {
     { key: 'price', label: 'Price', render: (r) => <span className="font-bold text-emerald-600">₹{r.price}</span> },
     { key: 'status', label: 'Status', render: (r) => (
       <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-        r.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
+        r.status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
       }`}>
-        {r.isActive ? 'Active' : 'Inactive'}
+        {r.status === 'active' ? 'Active' : 'Inactive'}
       </span>
     )},
   ];

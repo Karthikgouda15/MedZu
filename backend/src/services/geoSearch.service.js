@@ -71,9 +71,16 @@ export const findNearbyPharmaciesWithStock = async (
 
 export const searchMedicines = async (query, page = 1, limit = 10) => {
   const skip = (page - 1) * limit;
-  const filter = query
-    ? { $text: { $search: query }, status: 'active' }
-    : { status: 'active' };
+  let filter = { status: 'active' };
+  
+  if (query) {
+    const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    filter.$or = [
+      { name: { $regex: escapedQuery, $options: 'i' } },
+      { manufacturer: { $regex: escapedQuery, $options: 'i' } },
+      { category: { $regex: escapedQuery, $options: 'i' } },
+    ];
+  }
 
   const [medicines, total] = await Promise.all([
     Medicine.find(filter).skip(skip).limit(limit).sort({ name: 1 }),

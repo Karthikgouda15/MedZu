@@ -1,7 +1,7 @@
 import Medicine from '../models/Medicine.js';
 import MedicineRequest from '../models/MedicineRequest.js';
 import { AppError } from '../middlewares/errorHandler.js';
-import { getInventory, upsertInventory, adjustInventory } from '../services/inventory.service.js';
+import { getInventory, addInventory as addInventoryService, setInventory, deleteInventory, adjustInventory } from '../services/inventory.service.js';
 import { findNearbyPharmaciesWithStock, searchMedicines } from '../services/geoSearch.service.js';
 import {
   createRequest,
@@ -25,7 +25,7 @@ export const addInventory = async (req, res, next) => {
   try {
     if (!req.pharmacy) throw new AppError('Pharmacy profile not found', 404);
     const { medicineId, quantity } = req.body;
-    const data = await upsertInventory(req.pharmacy._id, medicineId, quantity);
+    const data = await addInventoryService(req.pharmacy._id, medicineId, quantity);
     res.status(201).json({ success: true, data });
   } catch (err) {
     next(err);
@@ -36,7 +36,7 @@ export const updateInventoryItem = async (req, res, next) => {
   try {
     if (!req.pharmacy) throw new AppError('Pharmacy profile not found', 404);
     const { quantity } = req.body;
-    const data = await upsertInventory(req.pharmacy._id, req.params.medicineId, quantity);
+    const data = await setInventory(req.pharmacy._id, req.params.medicineId, quantity);
     res.json({ success: true, data });
   } catch (err) {
     next(err);
@@ -46,8 +46,8 @@ export const updateInventoryItem = async (req, res, next) => {
 export const deleteInventoryItem = async (req, res, next) => {
   try {
     if (!req.pharmacy) throw new AppError('Pharmacy profile not found', 404);
-    const data = await upsertInventory(req.pharmacy._id, req.params.medicineId, 0);
-    res.json({ success: true, data });
+    const data = await deleteInventory(req.pharmacy._id, req.params.medicineId);
+    res.json({ success: true, message: 'Inventory item removed', data });
   } catch (err) {
     next(err);
   }
@@ -98,8 +98,10 @@ export const createMedicineRequest = async (req, res, next) => {
 export const getIncomingRequests = async (req, res, next) => {
   try {
     if (!req.pharmacy) throw new AppError('Pharmacy profile not found', 404);
-    const { page, limit } = req.query;
-    const result = await getRequests({ supplierPharmacy: req.pharmacy._id, status: 'pending' }, page, limit);
+    const { page, limit, status } = req.query;
+    const filter = { supplierPharmacy: req.pharmacy._id };
+    if (status) filter.status = status;
+    const result = await getRequests(filter, page, limit);
     res.json({ success: true, ...paginatedResponse(result.requests, result.total, result.page, result.limit) });
   } catch (err) {
     next(err);
@@ -156,7 +158,8 @@ export const rejectIncomingRequest = async (req, res, next) => {
 export const getRequestById = async (req, res, next) => {
   try {
     const request = await MedicineRequest.findById(req.params.id)
-      .populate('requesterPharmacy supplierPharmacy distributor medicine');
+      .populate('requesterPharmacy supplierPharmacy medicine')
+      .populate({ path: 'distributor', populate: { path: 'user' } });
     if (!request) throw new AppError('Request not found', 404);
     res.json({ success: true, data: request });
   } catch (err) {
@@ -175,6 +178,18 @@ export const checkLocalStock = async (req, res, next) => {
       success: true,
       data: { available, quantity: item?.quantity || 0, item },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getSupplierInventory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const inventory = await getInventory(id);
+    const pharmacy = await import('../models/Pharmacy.js').then(m => m.default.findById(id));
+    if (!pharmacy) throw new AppError('Supplier not found', 404);
+    res.json({ success: true, data: { inventory, pharmacy } });
   } catch (err) {
     next(err);
   }

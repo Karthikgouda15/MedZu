@@ -24,7 +24,10 @@ const populateRequest = (query) =>
   query
     .populate('requesterPharmacy')
     .populate('supplierPharmacy')
-    .populate('distributor')
+    .populate({
+      path: 'distributor',
+      populate: { path: 'user' },
+    })
     .populate('medicine');
 
 const VALID_TRANSITIONS = {

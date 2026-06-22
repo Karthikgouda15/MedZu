@@ -27,7 +27,7 @@ export default function DashboardLayout({ children, navItems, title }) {
   const notificationPath = navItems.find((n) => n.label.includes('Notification'))?.path || '#';
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -38,7 +38,7 @@ export default function DashboardLayout({ children, navItems, title }) {
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 shadow-2xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 shadow-2xl transition-transform duration-300 lg:relative lg:flex lg:translate-x-0 flex-shrink-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -112,9 +112,9 @@ export default function DashboardLayout({ children, navItems, title }) {
       </aside>
 
       {/* ─── Main Content ─── */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 h-full overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur-md lg:px-8">
+        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur-md lg:px-8 flex-shrink-0 z-30">
           <div className="flex items-center gap-4">
             <button
               className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
@@ -140,7 +140,14 @@ export default function DashboardLayout({ children, navItems, title }) {
               )}
             </button>
             {/* User avatar */}
-            <div className="hidden items-center gap-3 sm:flex">
+            <button 
+              onClick={() => {
+                const profilePath = navItems.find((n) => n.label.includes('Profile'))?.path || '/profile';
+                navigate(profilePath);
+              }}
+              className="hidden items-center gap-3 sm:flex hover:bg-slate-100 rounded-xl p-2 transition-colors cursor-pointer"
+              title="Go to Profile"
+            >
               <div className="text-right">
                 <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
                 <p className="text-xs capitalize text-slate-500">{user?.role}</p>
@@ -148,11 +155,11 @@ export default function DashboardLayout({ children, navItems, title }) {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-teal-400 text-xs font-bold text-white shadow-md">
                 {initials}
               </div>
-            </div>
+            </button>
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
           <div className="page-enter">{children}</div>
         </main>
       </div>

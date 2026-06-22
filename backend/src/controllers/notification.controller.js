@@ -9,7 +9,19 @@ export const getNotifications = async (req, res, next) => {
     if (unreadOnly === 'true') filter.readStatus = false;
 
     const [data, total, unreadCount] = await Promise.all([
-      Notification.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      Notification.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit))
+        .populate({
+          path: 'relatedRequest',
+          populate: [
+            { path: 'medicine', select: 'name category manufacturer' },
+            { path: 'requesterPharmacy', select: 'pharmacyName' },
+            { path: 'supplierPharmacy', select: 'pharmacyName' },
+            { path: 'distributor', populate: { path: 'user', select: 'name phone' } },
+          ],
+        }),
       Notification.countDocuments(filter),
       Notification.countDocuments({ user: req.user._id, readStatus: false }),
     ]);
