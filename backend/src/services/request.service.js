@@ -229,6 +229,11 @@ export const updateRequestStatus = async (requestId, newStatus, actor, distribut
   const request = await MedicineRequest.findById(requestId);
   if (!request) throw new AppError('Request not found', 404);
 
+  // Idempotency: already in target status — return early without error
+  if (request.status === newStatus) {
+    return populateRequest(MedicineRequest.findById(request._id));
+  }
+
   const allowed = VALID_TRANSITIONS[request.status];
   if (!allowed?.includes(newStatus)) {
     throw new AppError(`Cannot transition from ${request.status} to ${newStatus}`, 400);
@@ -241,7 +246,11 @@ export const updateRequestStatus = async (requestId, newStatus, actor, distribut
   request.status = newStatus;
 
   if (newStatus === 'picked_up') {
-    await adjustInventory(request.supplierPharmacy, request.medicine, -request.quantity);
+    try {
+      await adjustInventory(request.supplierPharmacy, request.medicine, -request.quantity);
+    } catch (invErr) {
+      console.error('[inventory] adjustInventory (picked_up deduct) failed:', invErr.message);
+    }
     const supplier = await Pharmacy.findById(request.supplierPharmacy).populate('user');
     if (supplier?.user) {
       await createNotification(
@@ -294,7 +303,11 @@ export const updateRequestStatus = async (requestId, newStatus, actor, distribut
   }
 
   if (newStatus === 'delivered') {
-    await adjustInventory(request.requesterPharmacy, request.medicine, request.quantity);
+    try {
+      await adjustInventory(request.requesterPharmacy, request.medicine, request.quantity);
+    } catch (invErr) {
+      console.error('[inventory] adjustInventory (delivered add) failed:', invErr.message);
+    }
     const requester = await Pharmacy.findById(request.requesterPharmacy).populate('user');
     if (requester?.user) {
       await createNotification(

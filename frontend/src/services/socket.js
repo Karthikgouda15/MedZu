@@ -19,6 +19,10 @@ export const connectSocket = (token) => {
     auth: { token },
     autoConnect: true,
     reconnection: true,
+    reconnectionAttempts: Infinity, // Reconnect infinitely if disconnected
+    reconnectionDelay: 1000,        // Start trying to reconnect after 1 second
+    reconnectionDelayMax: 5000,     // Max delay between reconnection attempts is 5 seconds
+    timeout: 20000,                 // Wait 20 seconds before timing out connection attempt
   });
 
   return socket;

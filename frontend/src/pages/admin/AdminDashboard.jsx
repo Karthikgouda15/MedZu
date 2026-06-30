@@ -29,21 +29,23 @@ export default function AdminDashboard() {
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchDashboardData = () => {
+  const fetchDashboardData = (isInitial = false) => {
+    if (isInitial) setLoading(true);
     Promise.all([
       api.get('/admin/analytics'),
       api.get('/admin/distributors/live'),
     ]).then(([a, d]) => {
       setAnalytics(a.data.data);
       setDistributors(d.data.data);
+      if (isInitial) setLoading(false);
     }).catch((err) => {
       console.error('Failed to fetch dashboard data:', err);
+      if (isInitial) setLoading(false);
     });
   };
 
   useEffect(() => {
-    fetchDashboardData();
-    setLoading(false);
+    fetchDashboardData(true);
   }, []);
 
   useEffect(() => {

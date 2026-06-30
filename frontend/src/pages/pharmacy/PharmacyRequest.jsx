@@ -8,395 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
 
-// ─── Dummy data (shown when API has no results / dev mode) ─────
-const DUMMY_SUPPLIERS = [
-  // ── Paracetamol cluster ──
-  {
-    userId: 'd1', role: 'Distributor', companyName: 'Apollo MedSupply Pvt Ltd',
-    distance: 820,
-    product: { _id: 'p1', name: 'Paracetamol 500mg', manufacturer: 'GSK Pharma', mrp: 25 },
-    inventory: { inStockQty: 480, sellingPrice: 18 },
-  },
-  {
-    userId: 'd2', role: 'Pharmacy', companyName: 'MedPlus Healthcare',
-    distance: 1400,
-    product: { _id: 'p2', name: 'Paracetamol 500mg', manufacturer: 'Cipla Ltd', mrp: 28 },
-    inventory: { inStockQty: 7, sellingPrice: 21 },
-  },
-  {
-    userId: 'd3', role: 'Distributor', companyName: 'Sun Pharma Distributors',
-    distance: 2100,
-    product: { _id: 'p3', name: 'Paracetamol 650mg', manufacturer: 'Sun Pharma', mrp: 35 },
-    inventory: { inStockQty: 950, sellingPrice: 24 },
-  },
-  {
-    userId: 'd4', role: 'Pharmacy', companyName: 'Fortis Medical Store',
-    distance: 3500,
-    product: { _id: 'p4', name: 'Paracetamol 500mg', manufacturer: "Dr. Reddy's", mrp: 26 },
-    inventory: { inStockQty: 0, sellingPrice: 20 },
-  },
-  {
-    userId: 'd5', role: 'Distributor', companyName: 'Cipla Pharma Hub',
-    distance: 4200,
-    product: { _id: 'p5', name: 'Paracetamol 500mg', manufacturer: 'Cipla Ltd', mrp: 25 },
-    inventory: { inStockQty: 1200, sellingPrice: 15 },
-  },
-  {
-    userId: 'd6', role: 'Pharmacy', companyName: 'HealthFirst Pharmacy',
-    distance: 5800,
-    product: { _id: 'p6', name: 'Paracetamol 500mg', manufacturer: 'Mankind Pharma', mrp: 22 },
-    inventory: { inStockQty: 340, sellingPrice: 17 },
-  },
-
-  // ── Amoxicillin cluster ──
-  {
-    userId: 'd7', role: 'Distributor', companyName: 'Zydus MedHub',
-    distance: 1100,
-    product: { _id: 'p7', name: 'Amoxicillin 500mg', manufacturer: 'Zydus Cadila', mrp: 85 },
-    inventory: { inStockQty: 620, sellingPrice: 62 },
-  },
-  {
-    userId: 'd8', role: 'Pharmacy', companyName: 'Wellness Forever Rx',
-    distance: 2600,
-    product: { _id: 'p8', name: 'Amoxicillin 250mg', manufacturer: 'Alkem Labs', mrp: 48 },
-    inventory: { inStockQty: 4, sellingPrice: 38 },
-  },
-  {
-    userId: 'd9', role: 'Distributor', companyName: 'Alkem Wholesale Depot',
-    distance: 5100,
-    product: { _id: 'p9', name: 'Amoxicillin 500mg', manufacturer: 'Alkem Labs', mrp: 90 },
-    inventory: { inStockQty: 0, sellingPrice: 70 },
-  },
-
-  // ── Metformin cluster ──
-  {
-    userId: 'd10', role: 'Distributor', companyName: 'Torrent Pharma Dist.',
-    distance: 980,
-    product: { _id: 'p10', name: 'Metformin 500mg', manufacturer: 'Torrent Pharma', mrp: 42 },
-    inventory: { inStockQty: 2400, sellingPrice: 30 },
-  },
-  {
-    userId: 'd11', role: 'Pharmacy', companyName: 'Noble Medicals',
-    distance: 3200,
-    product: { _id: 'p11', name: 'Metformin 850mg', manufacturer: 'USV Ltd', mrp: 58 },
-    inventory: { inStockQty: 180, sellingPrice: 44 },
-  },
-  {
-    userId: 'd12', role: 'Distributor', companyName: 'USV Distribution Centre',
-    distance: 6400,
-    product: { _id: 'p12', name: 'Metformin 1000mg', manufacturer: 'USV Ltd', mrp: 72 },
-    inventory: { inStockQty: 850, sellingPrice: 52 },
-  },
-
-  // ── Omeprazole cluster ──
-  {
-    userId: 'd13', role: 'Pharmacy', companyName: 'Star Plus Pharmacy',
-    distance: 750,
-    product: { _id: 'p13', name: 'Omeprazole 20mg', manufacturer: 'AstraZeneca', mrp: 55 },
-    inventory: { inStockQty: 290, sellingPrice: 40 },
-  },
-  {
-    userId: 'd14', role: 'Distributor', companyName: 'Lupin Pharma Warehouse',
-    distance: 3800,
-    product: { _id: 'p14', name: 'Omeprazole 40mg', manufacturer: 'Lupin Ltd', mrp: 80 },
-    inventory: { inStockQty: 760, sellingPrice: 55 },
-  },
-
-  // ── Azithromycin cluster ──
-  {
-    userId: 'd15', role: 'Distributor', companyName: 'Macleods Pharma Hub',
-    distance: 1750,
-    product: { _id: 'p15', name: 'Azithromycin 500mg', manufacturer: 'Macleods Pharma', mrp: 120 },
-    inventory: { inStockQty: 310, sellingPrice: 85 },
-  },
-  {
-    userId: 'd16', role: 'Pharmacy', companyName: 'Guardian Lifestyles',
-    distance: 4500,
-    product: { _id: 'p16', name: 'Azithromycin 250mg', manufacturer: 'Cipla Ltd', mrp: 65 },
-    inventory: { inStockQty: 8, sellingPrice: 50 },
-  },
-  {
-    userId: 'd17', role: 'Distributor', companyName: 'Hetero Wholesale Depot',
-    distance: 7200,
-    product: { _id: 'p17', name: 'Azithromycin 500mg', manufacturer: 'Hetero Labs', mrp: 115 },
-    inventory: { inStockQty: 1500, sellingPrice: 78 },
-  },
-
-  // ── Insulin cluster ──
-  {
-    userId: 'd18', role: 'Distributor', companyName: 'Novo Nordisk Dist. India',
-    distance: 2300,
-    product: { _id: 'p18', name: 'Insulin Glargine 100IU', manufacturer: 'Novo Nordisk', mrp: 950 },
-    inventory: { inStockQty: 60, sellingPrice: 820 },
-  },
-  {
-    userId: 'd19', role: 'Pharmacy', companyName: 'Diabetes Care Centre',
-    distance: 3100,
-    product: { _id: 'p19', name: 'Insulin Regular 40IU', manufacturer: 'Eli Lilly', mrp: 180 },
-    inventory: { inStockQty: 25, sellingPrice: 155 },
-  },
-  {
-    userId: 'd20', role: 'Distributor', companyName: 'Biocon MedChain',
-    distance: 8500,
-    product: { _id: 'p20', name: 'Insulin Aspart 100IU', manufacturer: 'Biocon Ltd', mrp: 1100 },
-    inventory: { inStockQty: 0, sellingPrice: 920 },
-  },
-
-  // ── Misc high-demand ──
-  {
-    userId: 'd21', role: 'Distributor', companyName: 'Mankind Pharma Depot',
-    distance: 1950,
-    product: { _id: 'p21', name: 'Pantoprazole 40mg', manufacturer: 'Mankind Pharma', mrp: 65 },
-    inventory: { inStockQty: 1800, sellingPrice: 42 },
-  },
-  {
-    userId: 'd22', role: 'Pharmacy', companyName: 'Apollo Pharmacy (HSR)',
-    distance: 600,
-    product: { _id: 'p22', name: 'Cetirizine 10mg', manufacturer: 'UCB Pharma', mrp: 30 },
-    inventory: { inStockQty: 550, sellingPrice: 22 },
-  },
-  {
-    userId: 'd23', role: 'Distributor', companyName: 'Glenmark Distribution',
-    distance: 5500,
-    product: { _id: 'p23', name: 'Montelukast 10mg', manufacturer: 'Glenmark Pharma', mrp: 145 },
-    inventory: { inStockQty: 420, sellingPrice: 105 },
-  },
-  {
-    userId: 'd24', role: 'Pharmacy', companyName: 'Netmeds Fulfilment Hub',
-    distance: 9800,
-    product: { _id: 'p24', name: 'Atorvastatin 10mg', manufacturer: 'Pfizer India', mrp: 110 },
-    inventory: { inStockQty: 3200, sellingPrice: 75 },
-  },
-  {
-    userId: 'd25', role: 'Distributor', companyName: 'Intas Pharma Warehouse',
-    distance: 12000,
-    product: { _id: 'p25', name: 'Amlodipine 5mg', manufacturer: 'Intas Pharma', mrp: 48 },
-    inventory: { inStockQty: 2700, sellingPrice: 32 },
-  },
-
-  // ── Ibuprofen cluster ──
-  {
-    userId: 'd26', role: 'Pharmacy', companyName: 'Reliance Health Pharmacy',
-    distance: 1200,
-    product: { _id: 'p26', name: 'Ibuprofen 400mg', manufacturer: 'Abbott India', mrp: 38 },
-    inventory: { inStockQty: 820, sellingPrice: 27 },
-  },
-  {
-    userId: 'd27', role: 'Distributor', companyName: 'Abbott MedDistrib India',
-    distance: 4700,
-    product: { _id: 'p27', name: 'Ibuprofen 600mg', manufacturer: 'Abbott India', mrp: 55 },
-    inventory: { inStockQty: 0, sellingPrice: 40 },
-  },
-  {
-    userId: 'd28', role: 'Pharmacy', companyName: 'CureFast Medstore',
-    distance: 2900,
-    product: { _id: 'p28', name: 'Ibuprofen 200mg', manufacturer: 'Cipla Ltd', mrp: 28 },
-    inventory: { inStockQty: 5, sellingPrice: 20 },
-  },
-
-  // ── Dexamethasone / Steroids ──
-  {
-    userId: 'd29', role: 'Distributor', companyName: 'Samarth Pharma Depot',
-    distance: 3300,
-    product: { _id: 'p29', name: 'Dexamethasone 0.5mg', manufacturer: 'Samarth Life Sciences', mrp: 18 },
-    inventory: { inStockQty: 3600, sellingPrice: 11 },
-  },
-  {
-    userId: 'd30', role: 'Pharmacy', companyName: 'Medico Plus Rx',
-    distance: 6100,
-    product: { _id: 'p30', name: 'Prednisolone 5mg', manufacturer: 'Wyeth India', mrp: 22 },
-    inventory: { inStockQty: 1100, sellingPrice: 15 },
-  },
-
-  // ── Vitamin D3 / Supplements ──
-  {
-    userId: 'd31', role: 'Pharmacy', companyName: 'Nutrition Care Hub',
-    distance: 890,
-    product: { _id: 'p31', name: 'Vitamin D3 60000IU', manufacturer: 'Sun Pharma', mrp: 85 },
-    inventory: { inStockQty: 640, sellingPrice: 58 },
-  },
-  {
-    userId: 'd32', role: 'Distributor', companyName: 'Himalaya Pharma Dist.',
-    distance: 2400,
-    product: { _id: 'p32', name: 'Vitamin B12 1500mcg', manufacturer: 'Himalaya Drug Co', mrp: 120 },
-    inventory: { inStockQty: 290, sellingPrice: 88 },
-  },
-  {
-    userId: 'd33', role: 'Pharmacy', companyName: 'HealthVault Pharmacy',
-    distance: 5200,
-    product: { _id: 'p33', name: 'Multivitamin Tablet', manufacturer: 'Pfizer India', mrp: 210 },
-    inventory: { inStockQty: 0, sellingPrice: 160 },
-  },
-
-  // ── Cough & Cold ──
-  {
-    userId: 'd34', role: 'Pharmacy', companyName: 'QuickRelief Medstore',
-    distance: 520,
-    product: { _id: 'p34', name: 'Dextromethorphan 10mg', manufacturer: 'Pfizer India', mrp: 42 },
-    inventory: { inStockQty: 430, sellingPrice: 30 },
-  },
-  {
-    userId: 'd35', role: 'Distributor', companyName: 'Franco India Pharma',
-    distance: 3700,
-    product: { _id: 'p35', name: 'Bromhexine 8mg', manufacturer: 'Franco India', mrp: 35 },
-    inventory: { inStockQty: 720, sellingPrice: 24 },
-  },
-  {
-    userId: 'd36', role: 'Pharmacy', companyName: 'Sneha Medical Stores',
-    distance: 7600,
-    product: { _id: 'p36', name: 'Salbutamol 2mg', manufacturer: 'GSK Pharma', mrp: 30 },
-    inventory: { inStockQty: 9, sellingPrice: 22 },
-  },
-
-  // ── Antacids / GI ──
-  {
-    userId: 'd37', role: 'Distributor', companyName: 'Elder Pharma Dist.',
-    distance: 1600,
-    product: { _id: 'p37', name: 'Ranitidine 150mg', manufacturer: 'Elder Pharma', mrp: 28 },
-    inventory: { inStockQty: 2200, sellingPrice: 18 },
-  },
-  {
-    userId: 'd38', role: 'Pharmacy', companyName: 'GastroCare Pharmacy',
-    distance: 4100,
-    product: { _id: 'p38', name: 'Domperidone 10mg', manufacturer: 'Janssen India', mrp: 45 },
-    inventory: { inStockQty: 380, sellingPrice: 32 },
-  },
-  {
-    userId: 'd39', role: 'Distributor', companyName: 'Zydus GI Depot',
-    distance: 8900,
-    product: { _id: 'p39', name: 'Rabeprazole 20mg', manufacturer: 'Zydus Cadila', mrp: 72 },
-    inventory: { inStockQty: 940, sellingPrice: 50 },
-  },
-
-  // ── Blood Pressure / Cardiac ──
-  {
-    userId: 'd40', role: 'Pharmacy', companyName: 'HeartCare Medicals',
-    distance: 2750,
-    product: { _id: 'p40', name: 'Losartan 50mg', manufacturer: 'Merck India', mrp: 95 },
-    inventory: { inStockQty: 510, sellingPrice: 68 },
-  },
-  {
-    userId: 'd41', role: 'Distributor', companyName: 'Cipla Cardiac Hub',
-    distance: 5900,
-    product: { _id: 'p41', name: 'Telmisartan 40mg', manufacturer: 'Cipla Ltd', mrp: 88 },
-    inventory: { inStockQty: 1350, sellingPrice: 60 },
-  },
-  {
-    userId: 'd42', role: 'Pharmacy', companyName: 'Prime Wellness Centre',
-    distance: 10500,
-    product: { _id: 'p42', name: 'Enalapril 5mg', manufacturer: 'Novartis India', mrp: 65 },
-    inventory: { inStockQty: 0, sellingPrice: 48 },
-  },
-
-  // ── Thyroid ──
-  {
-    userId: 'd43', role: 'Pharmacy', companyName: 'ThyroCare Pharmacy',
-    distance: 1850,
-    product: { _id: 'p43', name: 'Levothyroxine 50mcg', manufacturer: 'Abbott India', mrp: 48 },
-    inventory: { inStockQty: 660, sellingPrice: 34 },
-  },
-  {
-    userId: 'd44', role: 'Distributor', companyName: 'Abbott EndoChain',
-    distance: 6800,
-    product: { _id: 'p44', name: 'Levothyroxine 100mcg', manufacturer: 'Abbott India', mrp: 78 },
-    inventory: { inStockQty: 3, sellingPrice: 56 },
-  },
-
-  // ── Antibiotics (others) ──
-  {
-    userId: 'd45', role: 'Distributor', companyName: 'Wockhardt Pharma Dist.',
-    distance: 3450,
-    product: { _id: 'p45', name: 'Ciprofloxacin 500mg', manufacturer: 'Wockhardt Ltd', mrp: 75 },
-    inventory: { inStockQty: 1040, sellingPrice: 52 },
-  },
-  {
-    userId: 'd46', role: 'Pharmacy', companyName: 'RxWorld Medstore',
-    distance: 7300,
-    product: { _id: 'p46', name: 'Doxycycline 100mg', manufacturer: 'Lupin Ltd', mrp: 60 },
-    inventory: { inStockQty: 230, sellingPrice: 44 },
-  },
-  {
-    userId: 'd47', role: 'Distributor', companyName: 'Emcure Wholesale Hub',
-    distance: 11200,
-    product: { _id: 'p47', name: 'Cefixime 200mg', manufacturer: 'Emcure Pharma', mrp: 140 },
-    inventory: { inStockQty: 580, sellingPrice: 95 },
-  },
-
-  // ── Diabetes (others) ──
-  {
-    userId: 'd48', role: 'Pharmacy', companyName: 'SugarFree Medicals',
-    distance: 2050,
-    product: { _id: 'p48', name: 'Glimepiride 2mg', manufacturer: 'Sanofi India', mrp: 55 },
-    inventory: { inStockQty: 760, sellingPrice: 38 },
-  },
-  {
-    userId: 'd49', role: 'Distributor', companyName: 'Sanofi Pharma India Dist.',
-    distance: 9400,
-    product: { _id: 'p49', name: 'Sitagliptin 100mg', manufacturer: 'MSD India', mrp: 320 },
-    inventory: { inStockQty: 145, sellingPrice: 240 },
-  },
-
-  // ── Dermatology ──
-  {
-    userId: 'd50', role: 'Pharmacy', companyName: 'DermaCare Pharma',
-    distance: 4300,
-    product: { _id: 'p50', name: 'Clotrimazole 1% Cream', manufacturer: 'Bayer India', mrp: 90 },
-    inventory: { inStockQty: 0, sellingPrice: 65 },
-  },
-  {
-    userId: 'd51', role: 'Distributor', companyName: 'Glenmark Derm Depot',
-    distance: 6600,
-    product: { _id: 'p51', name: 'Fluconazole 150mg', manufacturer: 'Glenmark Pharma', mrp: 48 },
-    inventory: { inStockQty: 870, sellingPrice: 32 },
-  },
-  {
-    userId: 'd52', role: 'Pharmacy', companyName: 'SkinFirst Pharmacy',
-    distance: 13500,
-    product: { _id: 'p52', name: 'Betamethasone 0.1% Cream', manufacturer: 'GSK Pharma', mrp: 72 },
-    inventory: { inStockQty: 410, sellingPrice: 50 },
-  },
-
-  // ── Paediatric / Syrups ──
-  {
-    userId: 'd53', role: 'Pharmacy', companyName: 'KidCare Medical Store',
-    distance: 1350,
-    product: { _id: 'p53', name: 'Amoxicillin 125mg Syrup', manufacturer: 'Ranbaxy Labs', mrp: 55 },
-    inventory: { inStockQty: 190, sellingPrice: 40 },
-  },
-  {
-    userId: 'd54', role: 'Distributor', companyName: 'Panacea Biotec Dist.',
-    distance: 5400,
-    product: { _id: 'p54', name: 'Calpol Paed Syrup 120ml', manufacturer: 'GSK Pharma', mrp: 68 },
-    inventory: { inStockQty: 320, sellingPrice: 50 },
-  },
-
-  // ── Pain / Neurology ──
-  {
-    userId: 'd55', role: 'Distributor', companyName: 'Pfizer Neuro Depot',
-    distance: 4900,
-    product: { _id: 'p55', name: 'Pregabalin 75mg', manufacturer: 'Pfizer India', mrp: 180 },
-    inventory: { inStockQty: 420, sellingPrice: 130 },
-  },
-  {
-    userId: 'd56', role: 'Pharmacy', companyName: 'NeuroCare Pharma',
-    distance: 8200,
-    product: { _id: 'p56', name: 'Gabapentin 300mg', manufacturer: 'Sun Pharma', mrp: 95 },
-    inventory: { inStockQty: 6, sellingPrice: 68 },
-  },
-  {
-    userId: 'd57', role: 'Distributor', companyName: 'Torrent Neuro Hub',
-    distance: 15000,
-    product: { _id: 'p57', name: 'Tramadol 50mg', manufacturer: 'Torrent Pharma', mrp: 65 },
-    inventory: { inStockQty: 900, sellingPrice: 45 },
-  },
-];
-
-const LIVE_STUB = {
-  userId: 'live1', role: 'Distributor', companyName: 'QuickMed Express', isNew: true,
-  distance: 680,
-  product: { _id: 'pl1', name: 'Paracetamol 500mg', manufacturer: 'Alkem Labs', mrp: 24 },
-  inventory: { inStockQty: 200, sellingPrice: 14 },
-};
 
 function SkeletonCard() {
   return (
@@ -522,11 +133,10 @@ function SupplierCard({ result, qty, onQtyChange, onOrder, onRequest, isOrdering
             </div>
             <button
               onClick={() => onOrder(result)}
-              disabled={isOrdering || result.isDummy}
-              title={result.isDummy ? 'Demo data — add real suppliers to place orders' : ''}
+              disabled={isOrdering}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#37d38e] text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-60 shadow-sm shadow-[#37d38e]/30"
             >
-              {isOrdering ? <Loader2 className="w-4 h-4 animate-spin" /> : result.isDummy ? <>Demo Only</> : <>Place Order <ArrowRight className="w-3.5 h-3.5" /></>}
+              {isOrdering ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Place Order <ArrowRight className="w-3.5 h-3.5" /></>}
             </button>
           </div>
         )}
@@ -657,8 +267,7 @@ export default function PharmacyRequest() {
         const medicines = catalogData?.data || [];
 
         if (medicines.length === 0) {
-          // No medicines found in catalog — show dummy data as demo
-          setRawResults(DUMMY_SUPPLIERS.map(s => ({ ...s, isDummy: true })));
+          setRawResults([]);
           setLoading(false);
           return;
         }
@@ -697,14 +306,10 @@ export default function PharmacyRequest() {
           }
         }
 
-        // If real results found, use them; otherwise show dummy data as demo
-        if (allResults.length > 0) {
-          setRawResults(allResults);
-        } else {
-          setRawResults(DUMMY_SUPPLIERS.map(s => ({ ...s, isDummy: true })));
-        }
-      } catch {
-        setRawResults(DUMMY_SUPPLIERS.map(s => ({ ...s, isDummy: true })));
+        setRawResults(allResults);
+      } catch (err) {
+        console.error('Search error:', err);
+        setRawResults([]);
       } finally {
         setLoading(false);
       }
@@ -712,18 +317,6 @@ export default function PharmacyRequest() {
 
     return () => clearTimeout(timer);
   }, [search, location]);
-
-  useEffect(() => {
-    if (!hasSearched || rawResults.length === 0) return;
-    const t = setTimeout(() => {
-      setRawResults((prev) => {
-        if (prev.find(r => r.userId === LIVE_STUB.userId)) return prev;
-        showLiveToast('QuickMed Express just came online nearby!');
-        return [{ ...LIVE_STUB, isNew: true }, ...prev];
-      });
-    }, 4000);
-    return () => clearTimeout(t);
-  }, [hasSearched, rawResults.length]);
 
   const results = useMemo(() => {
     let list = [...rawResults];
@@ -969,18 +562,7 @@ export default function PharmacyRequest() {
 
           {results.length > 0 ? (
             <>
-              {/* Demo Mode banner – shown when results are sample/dummy data */}
-              {results.some(r => r.isDummy) && (
-                <div className="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
-                  <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-amber-700">Demo Results</p>
-                    <p className="text-[11px] text-amber-600 mt-0.5">
-                      No real suppliers found nearby. These are sample cards — add real medicine stock in Inventory to enable live ordering.
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* No demo banner */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {results.map((r, i) => (
                   <SupplierCard

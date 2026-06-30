@@ -148,7 +148,7 @@ export const getEarnings = async (req, res, next) => {
     const completed = await MedicineRequest.find({
       distributor: req.distributor._id,
       status: 'completed',
-    });
+    }).populate('medicine');
     const totalEarnings = completed.reduce((sum, r) => sum + (r.deliveryFee || 0), 0);
     res.json({
       success: true,

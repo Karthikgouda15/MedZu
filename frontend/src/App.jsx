@@ -38,7 +38,29 @@ import DistributorHistory from './pages/distributor/DistributorHistory';
 import DistributorEarnings from './pages/distributor/DistributorEarnings';
 import RegisterDistributor from './pages/RegisterDistributor';
 
+import { useEffect } from 'react';
+import axios from 'axios';
+
 export default function App() {
+  useEffect(() => {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api';
+    const pingBackend = async () => {
+      try {
+        await axios.get(`${API_URL}/health`);
+        console.log('Keep-alive ping to backend successful');
+      } catch (err) {
+        console.error('Keep-alive ping failed:', err);
+      }
+    };
+
+    // Ping once on mount
+    pingBackend();
+
+    // Ping every 5 minutes to prevent Render free-tier sleep
+    const interval = setInterval(pingBackend, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>

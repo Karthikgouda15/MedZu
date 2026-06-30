@@ -68,7 +68,27 @@ export const deleteInventory = async (pharmacyId, medicineId) => {
 
 export const adjustInventory = async (pharmacyId, medicineId, delta) => {
   const item = await Inventory.findOne({ pharmacy: pharmacyId, medicine: medicineId });
-  if (!item) throw new AppError('Inventory item not found', 404);
+
+  // If no inventory record exists:
+  // - For additions (delta > 0): create a new record with the given quantity (upsert)
+  // - For deductions (delta < 0): the item simply doesn't exist, throw a clear error
+  if (!item) {
+    if (delta > 0) {
+      // Receiving medicine for the first time — create inventory entry
+      const newItem = await Inventory.findOneAndUpdate(
+        { pharmacy: pharmacyId, medicine: medicineId },
+        { quantity: delta },
+        { new: true, upsert: true, runValidators: true }
+      ).populate('medicine');
+
+      if (ioInstance) {
+        ioInstance.to(`pharmacy:${pharmacyId}`).emit('inventory_updated', newItem);
+      }
+      return newItem;
+    }
+    // delta <= 0 and no inventory record — nothing to deduct
+    throw new AppError('Inventory item not found for this medicine at the source pharmacy', 404);
+  }
 
   const newQty = item.quantity + delta;
   if (newQty < 0) throw new AppError('Insufficient stock', 400);

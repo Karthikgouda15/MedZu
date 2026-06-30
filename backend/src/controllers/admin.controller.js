@@ -97,7 +97,20 @@ export const getDistributors = async (req, res, next) => {
       Distributor.find(filter).populate('user', 'name email phone status').skip(skip).limit(Number(limit)),
       Distributor.countDocuments(filter),
     ]);
-    res.json({ success: true, ...paginatedResponse(data, total, Number(page), Number(limit)) });
+
+    const distributorIds = data.map((d) => d._id);
+    const completedCounts = await MedicineRequest.aggregate([
+      { $match: { distributor: { $in: distributorIds }, status: 'completed' } },
+      { $group: { _id: '$distributor', count: { $sum: 1 } } },
+    ]);
+    const countsMap = new Map(completedCounts.map((c) => [c._id.toString(), c.count]));
+
+    const enrichedData = data.map((d) => ({
+      ...d.toObject(),
+      completedDeliveries: countsMap.get(d._id.toString()) || 0,
+    }));
+
+    res.json({ success: true, ...paginatedResponse(enrichedData, total, Number(page), Number(limit)) });
   } catch (err) {
     next(err);
   }

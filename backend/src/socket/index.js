@@ -17,6 +17,8 @@ export const initSocket = (httpServer) => {
       origin: process.env.CLIENT_URL || 'http://localhost:5173',
       credentials: true,
     },
+    pingInterval: 10000, // Send ping every 10 seconds to keep connection alive on reverse proxies
+    pingTimeout: 5000,   // Timeout connection if pong not received in 5 seconds
   });
 
   notificationService.setSocketIO(io);

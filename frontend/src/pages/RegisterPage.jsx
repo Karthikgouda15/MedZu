@@ -53,13 +53,30 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate coordinates before submitting
+    if (role === 'pharmacy') {
+      const lat = parseFloat(form.latitude);
+      const lng = parseFloat(form.longitude);
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        toast.error('Invalid latitude. Must be between -90 and 90.');
+        setLoading(false);
+        return;
+      }
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        toast.error('Invalid longitude. Must be between -180 and 180.');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       await register({
         ...form, role,
         latitude: parseFloat(form.latitude),
         longitude: parseFloat(form.longitude),
       });
-      toast.success('Registration successful! Awaiting admin approval.');
+      toast.success('Account created! You can now log in.');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -207,7 +224,10 @@ export default function RegisterPage() {
             {/* Location */}
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-600">Location</label>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">Location Coordinates</label>
+                  <p className="text-[10px] text-slate-400">Lat: −90 to 90 · Lng: −180 to 180</p>
+                </div>
                 <button
                   type="button"
                   onClick={handleDetectLocation}
@@ -217,8 +237,28 @@ export default function RegisterPage() {
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input value={form.latitude} onChange={(e) => update('latitude', e.target.value)} className="input-premium text-sm" placeholder="Latitude" />
-                <input value={form.longitude} onChange={(e) => update('longitude', e.target.value)} className="input-premium text-sm" placeholder="Longitude" />
+                <input
+                  value={form.latitude}
+                  onChange={(e) => update('latitude', e.target.value)}
+                  className="input-premium text-sm"
+                  placeholder="Latitude (e.g. 12.97)"
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                  required
+                />
+                <input
+                  value={form.longitude}
+                  onChange={(e) => update('longitude', e.target.value)}
+                  className="input-premium text-sm"
+                  placeholder="Longitude (e.g. 77.59)"
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                  required
+                />
               </div>
             </div>
 

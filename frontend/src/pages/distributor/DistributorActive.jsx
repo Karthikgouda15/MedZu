@@ -25,8 +25,10 @@ export default function DistributorActive() {
   const [deliveries, setDeliveries] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const watchId = useRef(null);
+  const gpsErrorShown = useRef(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -53,6 +55,7 @@ export default function DistributorActive() {
   useEffect(() => {
     if (!selected) return;
     joinRequestRoom(selected._id);
+    gpsErrorShown.current = false; // reset on new selection
 
     if (navigator.geolocation) {
       watchId.current = navigator.geolocation.watchPosition(
@@ -62,7 +65,12 @@ export default function DistributorActive() {
           emitLocation(selected._id, latitude, longitude);
           api.patch('/distributor/location', { latitude, longitude, requestId: selected._id }).catch(() => {});
         },
-        () => toast.error('Enable GPS for live tracking'),
+        () => {
+          if (!gpsErrorShown.current) {
+            gpsErrorShown.current = true;
+            toast.error('Enable GPS for live tracking');
+          }
+        },
         { enableHighAccuracy: true, maximumAge: 5000 }
       );
     }
@@ -96,13 +104,14 @@ export default function DistributorActive() {
   }, [selected, subscribe]);
 
   const performAction = async (action) => {
-    if (!selected || !action) return;
+    if (!selected || !action || actionLoading) return;
     const endpoints = {
       'pickup-start': 'pickup-start',
       'picked-up': 'picked-up',
       'en-route': 'en-route',
       delivered: 'delivered',
     };
+    setActionLoading(true);
     try {
       await api.patch(`/distributor/requests/${selected._id}/${endpoints[action]}`);
       toast.success(action === 'delivered' ? 'Delivery completed! 🎉' : 'Status updated');
@@ -118,6 +127,8 @@ export default function DistributorActive() {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -190,9 +201,10 @@ export default function DistributorActive() {
               {nextStep?.action && (
                 <button
                   onClick={() => performAction(nextStep.action)}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary-200 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-300"
+                  disabled={actionLoading}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-600 to-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary-200 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  {nextStep.label} <ArrowRight className="h-4 w-4" />
+                  {actionLoading ? 'Updating...' : <>{nextStep.label} <ArrowRight className="h-4 w-4" /></>}
                 </button>
               )}
             </div>
