@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Building2, Truck, Pill, Package, CheckCircle, Activity } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import api from '../../services/api';
+import { useSocket } from '../../contexts/SocketContext';
 import StatCard from '../../components/StatCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import LiveDistributorsMap from '../../components/LiveDistributorsMap';
@@ -23,19 +24,61 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function AdminDashboard() {
+  const { subscribe } = useSocket();
   const [analytics, setAnalytics] = useState(null);
   const [distributors, setDistributors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchDashboardData = (isInitial = false) => {
+    if (isInitial) setLoading(true);
     Promise.all([
       api.get('/admin/analytics'),
       api.get('/admin/distributors/live'),
     ]).then(([a, d]) => {
       setAnalytics(a.data.data);
       setDistributors(d.data.data);
-    }).finally(() => setLoading(false));
+      if (isInitial) setLoading(false);
+    }).catch((err) => {
+      console.error('Failed to fetch dashboard data:', err);
+      if (isInitial) setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    fetchDashboardData(true);
   }, []);
+
+  useEffect(() => {
+    // Subscribe to request status changes for real-time analytics updates
+    const events = [
+      'new_request',
+      'request_accepted',
+      'request_rejected',
+      'distributor_assigned',
+      'pickup_started',
+      'medicine_picked',
+      'delivery_started',
+      'delivery_completed',
+    ];
+    
+    const unsubs = events.map((event) =>
+      subscribe(event, () => {
+        fetchDashboardData();
+      })
+    );
+
+    // Subscribe to location updates for live distributor map
+    const locationUnsub = subscribe('location_updated', () => {
+      api.get('/admin/distributors/live')
+        .then(({ data }) => setDistributors(data.data))
+        .catch((err) => console.error('Failed to fetch live distributors:', err));
+    });
+
+    return () => {
+      unsubs.forEach((u) => u());
+      locationUnsub();
+    };
+  }, [subscribe]);
 
   if (loading) return <LoadingSpinner />;
 

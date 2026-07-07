@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6 },
     role: { type: String, enum: ['admin', 'pharmacy', 'distributor'], required: true },
     phone: { type: String, trim: true },
+    vehicleNo: { type: String, trim: true },
     status: { type: String, enum: ['active', 'pending', 'inactive'], default: 'pending' },
     refreshToken: { type: String, default: null },
   },

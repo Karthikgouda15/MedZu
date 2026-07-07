@@ -15,7 +15,9 @@ export default function LiveDistributorsMap({ distributors: initial = [], height
   const [distributors, setDistributors] = useState(initial);
 
   useEffect(() => {
-    setDistributors(initial);
+    Promise.resolve().then(() => {
+      setDistributors(initial);
+    });
   }, [initial]);
 
   useEffect(() => {

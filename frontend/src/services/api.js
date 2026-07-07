@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { connectSocket } from './socket';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -37,6 +38,7 @@ api.interceptors.response.use(
           const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
           localStorage.setItem('accessToken', data.data.accessToken);
           localStorage.setItem('refreshToken', data.data.refreshToken);
+          connectSocket(data.data.accessToken);
           original.headers.Authorization = `Bearer ${data.data.accessToken}`;
           return api(original);
         } catch {

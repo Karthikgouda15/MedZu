@@ -1,0 +1,42 @@
+services:
+  # 1. MedZu Node.js/Express Backend Server
+  - type: web
+    name: medzu-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5005
+      - key: MONGODB_URI
+        sync: false # Set your MongoDB Atlas Connection String here
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRY
+        value: 15m
+      - key: JWT_REFRESH_EXPIRY
+        value: 7d
+      - key: CLIENT_URL
+        value: https://medzu-frontend.onrender.com
+      - key: PLATFORM_COMMISSION_PERCENT
+        value: 5
+      - key: DEFAULT_DELIVERY_FEE
+        value: 50
+
+  # 2. MedZu Vite/React Frontend static site
+  - type: web
+    name: medzu-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://medzu-backend.onrender.com/api
+      - key: VITE_SOCKET_URL
+        value: https://medzu-backend.onrender.com

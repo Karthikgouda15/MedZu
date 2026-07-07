@@ -1,209 +1,539 @@
-import { Link } from 'react-router-dom';
-import { Pill, Truck, MapPin, Zap, ArrowRight, Shield, BarChart3, Package, Search, CheckCircle, Clock, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import {
+  Pill, Truck, MapPin, Shield,
+  Package, Search, Crosshair, Activity,
+  CheckCircle, Star, ArrowRight, Clock,
+  Users, Zap, Heart, ChevronDown, MessageSquare, Lock
+} from 'lucide-react';
 import AnimatedCounter from '../components/AnimatedCounter';
+import api from '../services/api';
+
+const HEADLINES = [
+  { text: "Critical medicine out of stock?", sub: "Find nearby pharmacies with stock instantly." },
+  { text: "Urgent patient prescription?", sub: "Procure and deliver it to your doorstep in minutes." },
+  { text: "Short on essential medical supplies?", sub: "Connect with the largest distributor network." },
+  { text: "Inter-pharmacy stock shortage?", sub: "Search, request, and track medicines in real-time." }
+];
+
+const POPULAR_CITIES = [
+  'Bangalore', 'Hyderabad', 'Mumbai', 'Chennai',
+  'Delhi', 'Pune', 'Kolkata', 'Ahmedabad'
+];
 
 const FEATURES = [
-  { icon: MapPin, title: 'Geo Search', desc: 'Find nearby pharmacies with medicine in stock using MongoDB geospatial search.', color: 'from-emerald-500 to-teal-500' },
-  { icon: Zap, title: 'Real-Time Updates', desc: 'Socket.IO powers instant notifications and live delivery tracking.', color: 'from-amber-500 to-orange-500' },
-  { icon: Truck, title: 'Distributor Network', desc: 'Auto-assign nearest distributors and track GPS location every 5 seconds.', color: 'from-blue-500 to-indigo-500' },
-  { icon: Package, title: 'Inventory Management', desc: 'Track your medicine stock in real-time with low-stock alerts.', color: 'from-purple-500 to-violet-500' },
-  { icon: BarChart3, title: 'Analytics Dashboard', desc: 'Comprehensive analytics with revenue tracking and performance metrics.', color: 'from-rose-500 to-pink-500' },
-  { icon: Shield, title: 'Audit Trail', desc: 'Complete audit logging for compliance and transparent operations.', color: 'from-cyan-500 to-blue-500' },
+  {
+    icon: Package,
+    title: 'No Minimum Order Limit',
+    desc: 'Procure a single strip of rare tablets or order in bulk for your entire pharmacy inventory. No restrictions.'
+  },
+  {
+    icon: MapPin,
+    title: 'Real-Time GPS Tracking',
+    desc: 'Follow your medicine courier in real-time. Keep track of temperature-sensitive items with live status updates.'
+  },
+  {
+    icon: Truck,
+    title: 'Express Pharmacy Delivery',
+    desc: 'When patients are waiting, minutes matter. Our automated dispatch system ensures critical medicines arrive fast.'
+  },
 ];
 
-const STEPS = [
-  { icon: Search, title: 'Search', desc: 'Find nearby pharmacies with the medicine you need' },
-  { icon: Package, title: 'Request', desc: 'Send a procurement request to the supplier pharmacy' },
-  { icon: Truck, title: 'Track', desc: 'Follow your delivery in real-time on the live map' },
-  { icon: CheckCircle, title: 'Deliver', desc: 'Receive the medicine at your pharmacy doorstep' },
-];
-
-const STATS = [
-  { value: 250, suffix: '+', label: 'Pharmacies Served' },
-  { value: 12000, suffix: '+', label: 'Deliveries Completed' },
-  { value: 15, suffix: '', label: 'Cities Covered' },
-  { value: 99.9, suffix: '%', label: 'Uptime' },
+const HOW_IT_WORKS = [
+  {
+    step: '01',
+    icon: Search,
+    title: 'Search Medicine',
+    desc: 'Enter the medicine name or prescription details. Our system instantly searches across all nearby pharmacies in your area.'
+  },
+  {
+    step: '02',
+    icon: Users,
+    title: 'Find Suppliers',
+    desc: 'View real-time stock availability from multiple pharmacies. Compare prices and delivery times at a glance.'
+  },
+  {
+    step: '03',
+    icon: Package,
+    title: 'Place Request',
+    desc: 'Select your preferred supplier and place the request. The system automatically assigns a verified distributor.'
+  },
+  {
+    step: '04',
+    icon: Truck,
+    title: 'Track Delivery',
+    desc: 'Monitor your medicine courier in real-time with GPS tracking. Get instant updates at every stage of delivery.'
+  },
 ];
 
 const TESTIMONIALS = [
-  { name: 'Dr. Priya Sharma', role: 'Apollo Pharmacy, Bangalore', text: 'MedZu has transformed how we handle out-of-stock medicines. Our patients never leave empty-handed anymore.' },
-  { name: 'Rajesh Kumar', role: 'Distributor, Hyderabad', text: 'The real-time GPS tracking makes my deliveries incredibly efficient. I can manage my routes and earnings easily.' },
-  { name: 'Dr. Ankit Patel', role: 'MedPlus, Chennai', text: 'The analytics dashboard helps us understand demand patterns. We\'ve reduced stock-outs by 40% since joining.' },
+  {
+    name: 'Dr. Rajesh Kumar',
+    role: 'Owner, HealthFirst Pharmacy',
+    rating: 5,
+    text: 'MedZu transformed how we manage stock shortages. What used to take hours of phone calls now takes minutes. The real-time tracking is a game-changer.',
+    avatar: 'RK'
+  },
+  {
+    name: 'Priya Sharma',
+    role: 'Head Pharmacist, Fortis Medical',
+    rating: 5,
+    text: 'The inter-pharmacy network is incredible. We found rare medicines within 15 minutes that were unavailable anywhere else. Highly recommended!',
+    avatar: 'PS'
+  },
+  {
+    name: 'Vikram Reddy',
+    role: 'Distributor Partner',
+    rating: 5,
+    text: 'As a delivery partner, MedZu gives me consistent work and transparent earnings. The app makes route optimization effortless.',
+    avatar: 'VR'
+  },
+];
+
+const TRUST_BADGES = [
+  { icon: Shield, text: 'FDA Compliant', sub: 'Drug safety standards' },
+  { icon: CheckCircle, text: 'Verified Pharmacies', sub: 'Licensed & certified' },
+  { icon: Lock, text: 'Secure Payments', sub: 'Encrypted transactions' },
+  { icon: Heart, text: '24/7 Support', sub: 'Always here to help' },
+];
+
+const FAQS = [
+  {
+    q: 'How quickly can I get medicines delivered?',
+    a: 'Most deliveries are completed within 24-45 minutes depending on your location and traffic conditions. Critical medicines are prioritized for faster delivery.'
+  },
+  {
+    q: 'Are all pharmacies on MedZu verified?',
+    a: 'Yes, every pharmacy on our platform undergoes a strict verification process including license validation, physical inspection, and background checks.'
+  },
+  {
+    q: 'What if the medicine is out of stock?',
+    a: 'Our system shows real-time stock availability. If a pharmacy runs out after you place a request, we automatically suggest alternative suppliers nearby.'
+  },
+  {
+    q: 'Is there a minimum order value?',
+    a: 'No! You can order a single strip of medicine or bulk inventory. MedZu has no minimum order restrictions.'
+  },
+  {
+    q: 'How do I become a delivery partner?',
+    a: 'Sign up as a distributor through our registration process. After verification of your vehicle and documents, you can start accepting deliveries immediately.'
+  },
 ];
 
 export default function LandingPage() {
+  const [headlineIndex, setHeadlineIndex] = useState(0);
+  const [location, setLocation] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [stats, setStats] = useState([
+    { value: 10, suffix: '+', label: 'Pharmacies Served' },
+    { value: 4, suffix: '+', label: 'Deliveries Completed' },
+    { value: 1, suffix: '', label: 'Cities Covered' },
+    { value: 99.9, suffix: '%', label: 'Uptime' },
+  ]);
+  const navigate = useNavigate();
+
+  // Load dynamic stats from MongoDB Atlas
+  useEffect(() => {
+    api.get('/public/stats')
+      .then(({ data: res }) => {
+        if (res.success && res.data) {
+          setStats([
+            { value: res.data.pharmacies, suffix: '+', label: 'Pharmacies Served' },
+            { value: res.data.deliveries, suffix: '+', label: 'Deliveries Completed' },
+            { value: res.data.cities, suffix: '', label: 'Cities Covered' },
+            { value: res.data.uptime, suffix: '%', label: 'Uptime' },
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load landing page stats:', err);
+      });
+  }, []);
+
+  // Rotate headlines every 3.5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeadlineIndex((prev) => (prev + 1) % HEADLINES.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation(`Indiranagar, Bangalore (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`);
+        setLocating(false);
+        toast.success("Location set to your current coordinates!");
+      },
+      (error) => {
+        console.error(error);
+        // Fallback to default location
+        setLocation("HSR Layout, Bangalore (12.9141° N, 77.6413° E)");
+        setLocating(false);
+        toast.success("Location set to default center");
+      }
+    );
+  };
+
+  const handleFindMedicines = () => {
+    if (!location.trim()) {
+      toast.error("Please enter a location or click 'Locate Me'!");
+      return;
+    }
+    toast.success("Searching nearby pharmacies...");
+    navigate(`/login?location=${encodeURIComponent(location)}`);
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* ─── Navigation ─── */}
-      <nav className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 shadow-lg shadow-primary-200">
-              <Pill className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-extrabold tracking-tight text-slate-900">Med<span className="text-primary-600">Zu</span></span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="btn-primary"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
 
-      {/* ─── Hero Section ─── */}
-      <section className="relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-gradient-to-br from-primary-100 to-teal-100 opacity-50 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 opacity-40 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-primary-50 to-transparent opacity-60 blur-3xl" />
-        
-        {/* Floating decorative elements */}
-        <div className="absolute top-20 right-[15%] animate-float opacity-20">
-          <Pill className="h-16 w-16 text-primary-400" />
-        </div>
-        <div className="absolute bottom-20 left-[10%] animate-float opacity-15" style={{ animationDelay: '1s' }}>
-          <Package className="h-12 w-12 text-teal-400" />
-        </div>
-        <div className="absolute top-40 left-[20%] animate-float opacity-10" style={{ animationDelay: '2s' }}>
-          <Truck className="h-14 w-14 text-blue-400" />
+      {/* ─── Hero Section - Modern Abstract Design ─── */}
+      <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          {/* Gradient Orbs */}
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }}></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }}></div>
+
+          {/* Grid Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+          </div>
+
+          {/* Floating Geometric Shapes */}
+          <div className="absolute top-32 right-20 w-20 h-20 border-2 border-primary-500/30 rotate-45 animate-float" style={{ animationDuration: '6s' }}></div>
+          <div className="absolute bottom-40 left-32 w-16 h-16 border-2 border-teal-500/30 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }}></div>
+          <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-primary-500/20 rotate-12 animate-float" style={{ animationDuration: '7s', animationDelay: '3s' }}></div>
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-6 py-24 text-center lg:py-36">
-          <div className="animate-fade-in-up">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary-700">
-              <span className="flex h-2 w-2 rounded-full bg-primary-500 animate-pulse" />
-              Live Inter-Pharmacy Platform
+        {/* Content Container */}
+        <div className="relative z-10 px-6 md:px-12 lg:px-20 py-8 min-h-screen flex flex-col">
+
+          {/* Header Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 shadow-lg shadow-primary-500/30">
+                <Pill className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-2xl font-extrabold tracking-tight text-white">
+                Med<span className="text-primary-400">Zu</span>
+              </span>
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tight text-slate-900 sm:text-7xl">
-              Real-Time Medicine
-              <span className="block mt-2 gradient-text">Procurement Network</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-500">
-              When a medicine is unavailable, find nearby pharmacies with stock, request delivery,
-              and track distributors in real time — like Swiggy, but for pharmacies.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                to="/register"
-                className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-600 to-teal-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-primary-200/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-300/50 hover:scale-[1.02]"
-              >
-                Get Started Free
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
+
+            <div className="flex items-center gap-4">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-base font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+                className="rounded-xl px-4 py-2 text-sm font-bold text-slate-300 transition-all hover:bg-white/10 hover:text-white"
               >
-                Sign In
+                Login
               </Link>
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-teal-500 px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-primary-500/30 hover:scale-105"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Content */}
+          <div className="flex-1 flex flex-col justify-center max-w-4xl mx-auto text-center py-12 sm:py-20">
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 text-sm font-medium mb-8 mx-auto">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Live Medicine Procurement Network</span>
+            </div>
+
+            {/* Animated Headline */}
+            <div className="mb-6">
+              <h1 key={`headline-${headlineIndex}`} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight animate-fade-in-up">
+                {HEADLINES[headlineIndex].text}
+              </h1>
+            </div>
+
+            <p key={`sub-${headlineIndex}`} className="mt-4 text-lg sm:text-xl text-slate-300 font-medium animate-fade-in-up max-w-2xl mx-auto">
+              {HEADLINES[headlineIndex].sub}
+            </p>
+
+            {/* Search Bar */}
+            <div className="relative mt-12 max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-2 shadow-2xl">
+              <div className="flex flex-1 items-center min-w-0 px-4">
+                <Search className="h-5 w-5 text-slate-400 mr-3 flex-shrink-0" />
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Enter pharmacy delivery address..."
+                  className="w-full py-3 text-base text-white placeholder-slate-400 bg-transparent border-0 outline-none focus:ring-0"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLocateMe}
+                  disabled={locating}
+                  className="flex items-center justify-center gap-2 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/10 transition-colors text-sm font-semibold rounded-xl disabled:opacity-50"
+                >
+                  {locating ? (
+                    <span className="h-4 w-4 border-2 border-primary-400 border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <Crosshair className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">Locate Me</span>
+                </button>
+
+                <button
+                  onClick={handleFindMedicines}
+                  className="rounded-xl bg-gradient-to-r from-primary-500 to-teal-500 px-6 py-3 text-sm sm:text-base font-bold text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-105 transition-all"
+                >
+                  Find Medicines
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-bold hover:bg-white/20 transition-all"
+              >
+                <span>Register Pharmacy</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/register/distributor"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-transparent border-2 border-white/30 text-white text-sm font-bold hover:border-primary-400 hover:bg-primary-500/10 transition-all"
+              >
+                <Truck className="h-4 w-4" />
+                <span>Become Partner</span>
+              </Link>
+            </div>
+
+            {/* Popular Cities */}
+            <div className="mt-12">
+              <p className="text-sm text-slate-400 mb-4">Popular Cities</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {POPULAR_CITIES.map((city) => (
+                  <button
+                    key={city}
+                    onClick={() => {
+                      setLocation(`${city}, India`);
+                      toast.success(`Selected ${city}`);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/10 hover:border-white/20 hover:text-white transition-all"
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Floating Stats Cards */}
+          <div className="hidden lg:grid grid-cols-3 gap-6 max-w-4xl mx-auto pb-12">
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-black text-white mb-1">10+</div>
+              <div className="text-sm text-slate-300">Pharmacies</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-black text-white mb-1">4+</div>
+              <div className="text-sm text-slate-300">Deliveries</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-black text-white mb-1">24min</div>
+              <div className="text-sm text-slate-300">Avg Delivery</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Stats Section ─── */}
-      <section className="border-y border-slate-100 bg-slate-50/50">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 py-16 md:grid-cols-4">
-          {STATS.map((stat, i) => (
-            <div key={stat.label} className="animate-fade-in-up text-center" style={{ animationDelay: `${i * 100}ms` }}>
-              <p className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-                <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1500 + i * 200} />
+      {/* ─── Stats Section (Full Width Ribbon) ─── */}
+      <section className="bg-white border-b border-slate-100 py-10 shadow-sm relative z-20">
+        <div className="mx-auto max-w-7xl px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {stats.map((stat, i) => (
+            <div
+              key={stat.label}
+              className="text-center animate-fade-in-up"
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <p className="text-3xl sm:text-4xl font-extrabold text-slate-950">
+                <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1400 + i * 200} />
               </p>
-              <p className="mt-2 text-sm font-medium text-slate-500">{stat.label}</p>
+              <p className="mt-1.5 text-xs sm:text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
-      <section className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">How It Works</h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">Four simple steps to procure any medicine from nearby pharmacies</p>
-          </div>
-          <div className="relative mt-16 grid gap-8 md:grid-cols-4">
-            {/* Connecting line */}
-            <div className="absolute left-0 right-0 top-10 hidden h-0.5 bg-gradient-to-r from-primary-200 via-primary-300 to-primary-200 md:block" />
-            {STEPS.map((step, i) => (
-              <div key={step.title} className="animate-fade-in-up relative text-center" style={{ animationDelay: `${i * 100}ms` }}>
-                <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 text-white shadow-xl shadow-primary-200/50">
-                  <step.icon className="h-8 w-8" />
-                  <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-primary-600 shadow-md ring-2 ring-primary-100">
-                    {i + 1}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">{step.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">{step.desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* ─── Features Section - Modern Card Design ─── */}
+      <section className="bg-gradient-to-b from-slate-50 to-white py-24 relative overflow-hidden">
+        {/* Abstract Background */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-100/50 to-teal-100/50"></div>
+          <div className="absolute top-20 right-20 w-64 h-64 bg-primary-200/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-64 h-64 bg-teal-200/30 rounded-full blur-3xl"></div>
         </div>
-      </section>
 
-      {/* ─── Features Grid ─── */}
-      <section className="bg-slate-50/50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">Everything You Need</h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">A complete platform for inter-pharmacy medicine procurement</p>
+        <div className="mx-auto max-w-7xl px-6 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-bold mb-4">
+              <Zap className="h-4 w-4" />
+              <span>Powerful Features</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+              Why Choose <span className="text-primary-600">MedZu</span>?
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
+              Built for pharmacies, designed for speed. Experience the future of medicine procurement.
+            </p>
           </div>
-          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feat, i) => (
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {FEATURES.map((feat, index) => (
               <div
                 key={feat.title}
-                className="animate-fade-in-up card-hover group rounded-2xl border border-slate-200 bg-white p-7"
-                style={{ animationDelay: `${i * 80}ms` }}
+                className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 hover:-translate-y-2 border border-slate-100"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className={`mb-5 inline-flex rounded-xl bg-gradient-to-br ${feat.color} p-3.5 shadow-lg transition-transform duration-300 group-hover:scale-110`}>
-                  <feat.icon className="h-6 w-6 text-white" />
+                {/* Hover Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-teal-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                <div className="relative">
+                  {/* Icon Container */}
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                    <feat.icon className="h-8 w-8" />
+                  </div>
+
+                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary-600 transition-colors">
+                    {feat.title}
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    {feat.desc}
+                  </p>
+
+                  {/* Arrow Indicator */}
+                  <div className="mt-6 flex items-center gap-2 text-primary-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span>Learn More</span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">{feat.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">{feat.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Testimonials ─── */}
-      <section className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">Trusted by Pharmacies</h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">See what our users have to say about MedZu</p>
+      {/* ─── How It Works Section - Timeline Design ─── */}
+      <section className="bg-gradient-to-b from-white to-slate-50 py-24 relative overflow-hidden">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100 text-teal-700 text-sm font-bold mb-4">
+              <Clock className="h-4 w-4" />
+              <span>Simple Process</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+              How It <span className="text-primary-600">Works</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
+              Get medicines delivered in 4 simple steps. From search to doorstep, we've streamlined the entire process.
+            </p>
           </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
+
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 via-teal-500 to-emerald-500 rounded-full"></div>
+
+            <div className="space-y-12">
+              {HOW_IT_WORKS.map((item, index) => (
+                <div key={item.step} className={`relative flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
+                  {/* Content Card */}
+                  <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'}`}>
+                    <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 border border-slate-100 group">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 flex-shrink-0 group-hover:scale-110 transition-transform">
+                          <item.icon className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-primary-600 mb-1">STEP {item.step}</div>
+                          <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
+                          <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Center Dot */}
+                  <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-teal-500 items-center justify-center text-white font-black text-lg shadow-xl shadow-primary-300/50 z-10">
+                    {index + 1}
+                  </div>
+
+                  {/* Empty Space for Alternating Layout */}
+                  <div className="hidden lg:block w-5/12"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Trust Badges Section - Modern Grid ─── */}
+      <section className="bg-white py-20 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="1" fill="currentColor" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dots)" />
+          </svg>
+        </div>
+
+        <div className="mx-auto max-w-6xl px-6 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-4">
+              <Shield className="h-4 w-4" />
+              <span>Trusted & Secure</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              Built on Trust & Security
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {TRUST_BADGES.map((badge, index) => (
               <div
-                key={t.name}
-                className="animate-fade-in-up card-hover rounded-2xl border border-slate-200 bg-white p-7"
-                style={{ animationDelay: `${i * 100}ms` }}
+                key={badge.text}
+                className="group relative bg-gradient-to-br from-slate-50 to-white rounded-2xl p-6 border border-slate-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-100/50 transition-all duration-300"
               >
-                <div className="mb-4 flex gap-1">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm leading-relaxed text-slate-600 italic">"{t.text}"</p>
-                <div className="mt-5 flex items-center gap-3 border-t border-slate-100 pt-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-teal-400 text-sm font-bold text-white">
-                    {t.name.split(' ').map((n) => n[0]).join('')}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/0 to-teal-500/0 rounded-2xl group-hover:from-primary-500/5 group-hover:to-teal-500/5 transition-all duration-300"></div>
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <badge.icon className="h-7 w-7" />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                    <p className="text-xs text-slate-500">{t.role}</p>
-                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{badge.text}</h4>
+                  <p className="text-xs text-slate-500 mt-1">{badge.sub}</p>
                 </div>
               </div>
             ))}
@@ -211,65 +541,395 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── CTA Banner ─── */}
-      <section className="mx-6 mb-20 overflow-hidden rounded-3xl bg-gradient-to-r from-primary-600 via-emerald-600 to-teal-600 shadow-2xl shadow-primary-200/40 lg:mx-auto lg:max-w-5xl">
-        <div className="relative px-8 py-16 text-center sm:px-16">
-          <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-          <h2 className="relative text-3xl font-extrabold text-white sm:text-4xl">Ready to Get Started?</h2>
-          <p className="relative mx-auto mt-4 max-w-lg text-lg text-primary-100">
-            Join hundreds of pharmacies already using MedZu to ensure their patients always get the medicines they need.
-          </p>
-          <Link
-            to="/register"
-            className="relative mt-8 inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-base font-bold text-primary-700 shadow-xl transition-all hover:shadow-2xl hover:scale-[1.02]"
-          >
-            Create Free Account <ArrowRight className="h-5 w-5" />
-          </Link>
+      {/* ─── Testimonials Section - Marquee Scrolling Animation ─── */}
+      <section className="bg-gradient-to-b from-slate-50 to-white py-24 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-100/50 to-teal-100/50 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-teal-100/50 to-emerald-100/50 rounded-full blur-3xl"></div>
+
+        <div className="mx-auto max-w-7xl px-6 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-700 text-sm font-bold mb-4">
+              <Star className="h-4 w-4 fill-current" />
+              <span>Customer Stories</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+              Trusted by <span className="text-primary-600">Pharmacies</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
+              See what our partners say about their experience with MedZu.
+            </p>
+          </div>
+
+          {/* Marquee Container */}
+          <div className="relative overflow-hidden">
+            {/* Left Gradient Fade */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-slate-50 to-transparent z-10"></div>
+            {/* Right Gradient Fade */}
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-slate-50 to-transparent z-10"></div>
+
+            {/* Scrolling Track */}
+            <div className="flex gap-8 animate-scroll">
+              {/* Duplicate testimonials for seamless loop */}
+              {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
+                <div
+                  key={`${testimonial.name}-${index}`}
+                  className="flex-shrink-0 w-80 md:w-96 group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 border border-slate-100 hover:-translate-y-2"
+                >
+                  {/* Quote Icon */}
+                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-400 opacity-50">
+                    <MessageSquare className="h-4 w-4" />
+                  </div>
+
+                  {/* Rating stars */}
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+
+                  {/* Testimonial text */}
+                  <p className="text-slate-700 leading-relaxed mb-8 text-lg">
+                    "{testimonial.text}"
+                  </p>
+
+                  {/* Author info */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-300/50 group-hover:scale-110 transition-transform">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{testimonial.name}</p>
+                      <p className="text-xs text-slate-500">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      {/* ─── FAQ Section - Modern Accordion ─── */}
+      <section className="bg-white py-24 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="faq-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="2" fill="currentColor" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#faq-pattern)" />
+          </svg>
+        </div>
+
+        <div className="mx-auto max-w-4xl px-6 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-bold mb-4">
+              <MessageSquare className="h-4 w-4" />
+              <span>Got Questions?</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+              Frequently Asked <span className="text-primary-600">Questions</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
+              Everything you need to know about MedZu.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {FAQS.map((faq, index) => (
+              <div
+                key={index}
+                className={`group relative bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ${expandedFaq === index ? 'shadow-xl shadow-primary-100/50 border-primary-300' : 'hover:border-primary-200 hover:shadow-lg'}`}
+              >
+                <button
+                  onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${expandedFaq === index ? 'bg-primary-500 text-white' : 'bg-slate-200 text-slate-600 group-hover:bg-primary-100 group-hover:text-primary-600'}`}>
+                      <span className="font-bold text-sm">{index + 1}</span>
+                    </div>
+                    <span className="font-bold text-slate-900 pr-4 group-hover:text-primary-600 transition-colors">{faq.q}</span>
+                  </div>
+                  <ChevronDown
+                    className={`h-5 w-5 text-slate-400 flex-shrink-0 transition-transform ${expandedFaq === index ? 'rotate-180 text-primary-600' : ''}`}
+                  />
+                </button>
+                {expandedFaq === index && (
+                  <div className="px-6 pb-6 pt-0 pl-20">
+                    <p className="text-slate-600 leading-relaxed">{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="border-t border-slate-200 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-teal-500">
-                  <Pill className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-lg font-bold text-slate-900">MedZu</span>
+      {/* ─── Mobile App Section - Abstract Design ─── */}
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-24 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-20 left-20 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }}></div>
+            <div className="absolute bottom-20 right-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }}></div>
+          </div>
+
+          {/* Floating Elements */}
+          <div className="absolute top-32 right-32 w-16 h-16 border-2 border-primary-500/20 rotate-45 animate-float" style={{ animationDuration: '6s' }}></div>
+          <div className="absolute bottom-32 left-32 w-12 h-12 border-2 border-teal-500/20 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }}></div>
+        </div>
+
+        <div className="mx-auto max-w-6xl px-6 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+            {/* Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 text-sm font-bold mb-6">
+                <Zap className="h-4 w-4" />
+                <span>Mobile Experience</span>
               </div>
-              <p className="mt-3 text-sm text-slate-500">Inter-pharmacy medicine procurement platform with real-time tracking.</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight mb-6">
+                Medicines in Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-teal-400">Pocket</span>
+              </h2>
+              <p className="text-lg text-slate-300 leading-relaxed mb-8 max-w-xl">
+                Connect your pharmacy to nearby inventory hubs, place lightning-fast procurement requests, and monitor delivery riders in real-time. Everything is just one tap away.
+              </p>
+
+              {/* Download Buttons */}
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <a href="#appstore" onClick={(e) => { e.preventDefault(); toast.success("Redirecting to Apple App Store..."); }} className="group flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all">
+                  <svg className="w-6 h-6 text-white fill-current" viewBox="0 0 24 24">
+                    <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,22C14.32,22.05 13.89,21.24 12.37,21.24C10.84,21.24 10.37,21.97 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.1,16.67C20.08,16.74 19.67,18.11 18.71,19.5M15.97,4.17C16.63,3.37 17.07,2.28 16.95,1C16,1.04 14.9,1.6 14.24,2.38C13.68,3.04 13.19,4.14 13.34,5.39C14.39,5.47 15.4,4.88 15.97,4.17Z" />
+                  </svg>
+                  <div className="text-left leading-none">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase">Download on the</p>
+                    <p className="text-sm font-bold text-white mt-0.5">App Store</p>
+                  </div>
+                </a>
+
+                <a href="#playstore" onClick={(e) => { e.preventDefault(); toast.success("Redirecting to Google Play Store..."); }} className="group flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 hover:bg-white/20 transition-all">
+                  <svg className="w-6 h-6 text-white fill-current" viewBox="0 0 24 24">
+                    <path d="M3,5.27V18.73L16.55,12L3,5.27M17.87,11.33L19.85,12.33C20.37,12.59 20.37,13.41 19.85,13.67L17.87,14.67L14.74,13.1L17.87,11.33M3,3.5C3,3.07 3.47,2.83 3.84,3.03L20.84,11.53C21.43,11.83 21.43,12.67 20.84,12.97L3.84,21.47C3.47,21.67 3,21.43 3,21V3.5Z" />
+                  </svg>
+                  <div className="text-left leading-none">
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase">Get it on</p>
+                    <p className="text-sm font-bold text-white mt-0.5">Google Play</p>
+                  </div>
+                </a>
+              </div>
             </div>
+
+            {/* Abstract Phone Mockup */}
+            <div className="relative mx-auto lg:mx-0">
+              {/* Phone Frame */}
+              <div className="relative w-64 h-[500px] bg-gradient-to-br from-slate-700 to-slate-800 rounded-[3rem] border-4 border-slate-600 shadow-2xl overflow-hidden">
+                {/* Screen */}
+                <div className="absolute inset-2 bg-gradient-to-br from-primary-500/20 to-teal-500/20 rounded-[2.5rem] overflow-hidden">
+                  {/* Abstract App UI */}
+                  <div className="absolute inset-0 p-6 flex flex-col">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Pill className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="px-3 py-1 rounded-full bg-emerald-500/30 backdrop-blur-sm border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                        LIVE
+                      </div>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="w-full h-10 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4"></div>
+
+                    {/* Map Area */}
+                    <div className="flex-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden mb-4">
+                      {/* Abstract Map Lines */}
+                      <div className="absolute inset-0">
+                        <div className="absolute top-1/4 left-0 right-0 h-0.5 bg-white/20"></div>
+                        <div className="absolute top-2/3 left-0 right-0 h-0.5 bg-white/20"></div>
+                        <div className="absolute left-1/3 top-0 bottom-0 w-0.5 bg-white/20"></div>
+                        <div className="absolute left-2/3 top-0 bottom-0 w-0.5 bg-white/20"></div>
+                      </div>
+
+                      {/* Location Pins */}
+                      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg animate-bounce">
+                          <Truck className="h-4 w-4 text-white" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-1/4 left-1/4">
+                        <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center shadow-lg">
+                          <Pill className="h-3 w-3 text-white" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Card */}
+                    <div className="w-full h-16 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center gap-3 p-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse">
+                        <Activity className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="h-2 w-3/4 bg-white/30 rounded mb-1"></div>
+                        <div className="h-2 w-1/2 bg-white/20 rounded"></div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-emerald-400 font-black">4m</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Elements Around Phone */}
+              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-xl animate-float" style={{ animationDuration: '4s' }}>
+                <Activity className="h-6 w-6" />
+              </div>
+              <div className="absolute -bottom-4 -left-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white animate-float" style={{ animationDuration: '5s', animationDelay: '1s' }}>
+                <MapPin className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Final CTA Section - Modern Design ─── */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Dynamic Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-teal-600 to-emerald-600"></div>
+
+        {/* Animated Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="cta-modern-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="2" fill="white" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#cta-modern-pattern)" />
+          </svg>
+        </div>
+
+        {/* Gradient Orbs */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }}></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
+        </div>
+
+        <div className="mx-auto max-w-5xl px-6 text-center relative z-10">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-sm font-bold mb-8">
+            <Heart className="h-4 w-4 fill-current" />
+            <span>Join the Network</span>
+          </div>
+
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+            Ready to Transform<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">Your Pharmacy?</span>
+          </h2>
+
+          <p className="text-lg sm:text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join hundreds of pharmacies already using MedZu to streamline medicine procurement and deliver better patient care.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+            <Link
+              to="/register"
+              className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-white text-primary-600 font-bold text-lg hover:bg-slate-50 transition-all shadow-2xl hover:shadow-3xl hover:-translate-y-1"
+            >
+              <span>Join as Pharmacy</span>
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              to="/register/distributor"
+              className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-transparent border-2 border-white text-white font-bold text-lg hover:bg-white/10 transition-all hover:border-white/50"
+            >
+              <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <span>Become a Partner</span>
+            </Link>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-12 flex flex-wrap justify-center gap-8 text-white/80 text-sm">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 fill-current" />
+              <span>Free to join</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 fill-current" />
+              <span>No setup fees</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 fill-current" />
+              <span>Start in minutes</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Footer Section ─── */}
+      <footer className="border-t border-slate-200 bg-[#0f172a] text-slate-400 pt-16 pb-12 relative z-10">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-10 md:grid-cols-4 pb-12 border-b border-slate-800">
             <div>
-              <h4 className="text-sm font-semibold text-slate-900">Platform</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-500">
-                <li><Link to="/register" className="hover:text-primary-600 transition-colors">For Pharmacies</Link></li>
-                <li><Link to="/register" className="hover:text-primary-600 transition-colors">For Distributors</Link></li>
-                <li><Link to="/login" className="hover:text-primary-600 transition-colors">Admin Panel</Link></li>
+              <div className="flex items-center gap-2 text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500">
+                  <Pill className="h-4.5 w-4.5 text-white" />
+                </div>
+                <span className="text-xl font-extrabold text-white">MedZu</span>
+              </div>
+              <p className="mt-4 text-xs leading-relaxed text-slate-400">
+                Inter-pharmacy live medicine procurement network. Find nearby pharmacy stock, manage delivery, and prevent medicine shortages instantly.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold tracking-widest text-white uppercase mb-4">We Deliver To</h4>
+              <ul className="space-y-2.5 text-xs text-slate-400">
+                <li><a href="#cities" className="hover:text-white transition-colors">Bangalore (Bengaluru)</a></li>
+                <li><a href="#cities" className="hover:text-white transition-colors">Mumbai</a></li>
+                <li><a href="#cities" className="hover:text-white transition-colors">Hyderabad</a></li>
+                <li><a href="#cities" className="hover:text-white transition-colors">Chennai</a></li>
+                <li><a href="#cities" className="hover:text-white transition-colors">Delhi / NCR</a></li>
+                <li><a href="#cities" className="hover:text-white transition-colors">Pune</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="text-sm font-semibold text-slate-900">Features</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-500">
-                <li>Geo-based Search</li>
-                <li>Live GPS Tracking</li>
-                <li>Inventory Management</li>
-                <li>Analytics & Reports</li>
+              <h4 className="text-xs font-bold tracking-widest text-white uppercase mb-4">Company</h4>
+              <ul className="space-y-2.5 text-xs text-slate-400">
+                <li><Link to="/register" className="hover:text-white transition-colors font-semibold">Join Pharmacy Network</Link></li>
+                <li><Link to="/register/distributor" className="hover:text-white transition-colors font-semibold">Become a Delivery Partner</Link></li>
+                <li><a href="#about" className="hover:text-white transition-colors">About MedZu</a></li>
+                <li><a href="#careers" className="hover:text-white transition-colors">Careers & Team</a></li>
+                <li><a href="#contact" className="hover:text-white transition-colors">Contact Support</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="text-sm font-semibold text-slate-900">Support</h4>
-              <ul className="mt-3 space-y-2 text-sm text-slate-500">
-                <li>Documentation</li>
-                <li>API Reference</li>
-                <li>Contact Us</li>
+              <h4 className="text-xs font-bold tracking-widest text-white uppercase mb-4">Legal & Safety</h4>
+              <ul className="space-y-2.5 text-xs text-slate-400">
+                <li><a href="#terms" className="hover:text-white transition-colors">Terms of Procurement</a></li>
+                <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Shield Policy</a></li>
+                <li><a href="#compliance" className="hover:text-white transition-colors">FDA / Drug Compliance</a></li>
+                <li><a href="#safety" className="hover:text-white transition-colors">Cold Chain Standards</a></li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
-            &copy; {new Date().getFullYear()} MedZu. Built for seamless inter-pharmacy medicine procurement.
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+            <div>
+              &​copy; {new Date().getFullYear()} MedZu Technologies Pvt. Ltd. Licensed under applicable drug rules.
+            </div>
+            <div className="flex gap-4">
+              <a href="#social" className="hover:text-white">Facebook</a>
+              <a href="#social" className="hover:text-white">Twitter</a>
+              <a href="#social" className="hover:text-white">LinkedIn</a>
+            </div>
           </div>
         </div>
       </footer>

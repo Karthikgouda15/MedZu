@@ -1,27 +1,55 @@
 import { useEffect, useState } from 'react';
 import { Package, ArrowRight } from 'lucide-react';
 import api from '../../services/api';
+import { useSocket } from '../../contexts/SocketContext';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import PageHeader from '../../components/PageHeader';
 
 export default function AdminRequests() {
+  const { subscribe } = useSocket();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get('/admin/requests')
+  const fetchRequests = () => {
+    api.get('/admin/requests?limit=1000')
       .then(({ data }) => {
         setRequests(data.data || []);
-        setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to fetch requests:', err);
-        setRequests([]);
-        setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchRequests();
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    // Subscribe to all request-related events for real-time updates
+    const events = [
+      'new_request',
+      'request_accepted',
+      'request_rejected',
+      'distributor_assigned',
+      'pickup_started',
+      'medicine_picked',
+      'delivery_started',
+      'delivery_completed',
+    ];
+    
+    const unsubs = events.map((event) =>
+      subscribe(event, () => {
+        fetchRequests();
+      })
+    );
+
+    return () => {
+      unsubs.forEach((u) => u());
+    };
+  }, [subscribe]);
 
   const columns = [
     { key: 'medicine', label: 'Details', render: (r) => (

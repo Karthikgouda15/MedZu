@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.data.user);
       setProfile(data.data.profile);
       connectSocket(token);
-    } catch (err) {
+    } catch {
       // Clear tokens on any auth error (401, 403, etc.)
       localStorage.clear();
       disconnectSocket();
@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    loadUser();
+    Promise.resolve().then(() => {
+      loadUser();
+    });
   }, [loadUser]);
 
   const login = async (email, password) => {
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

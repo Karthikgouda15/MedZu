@@ -15,7 +15,7 @@ const buildTokens = (user) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, pharmacyName, address, latitude, longitude, licenseNumber, vehicleType } = req.body;
+    const { name, email, password, role, phone, pharmacyName, address, latitude, longitude, licenseNumber, vehicleType, vehicleNo } = req.body;
 
     if (!['pharmacy', 'distributor'].includes(role)) {
       throw new AppError('Invalid registration role', 400);
@@ -24,13 +24,26 @@ export const register = async (req, res, next) => {
     const exists = await User.findOne({ email });
     if (exists) throw new AppError('Email already registered', 400);
 
+    // Validate coordinates if provided
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    if (role === 'pharmacy') {
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        throw new AppError('Invalid latitude. Must be between -90 and 90.', 400);
+      }
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        throw new AppError('Invalid longitude. Must be between -180 and 180.', 400);
+      }
+    }
+
     const user = await User.create({
       name,
       email,
       password,
       role,
       phone,
-      status: 'pending',
+      vehicleNo: role === 'distributor' ? vehicleNo : undefined,
+      status: 'active',
     });
 
     if (role === 'pharmacy') {
@@ -41,11 +54,11 @@ export const register = async (req, res, next) => {
         user: user._id,
         pharmacyName,
         address,
-        latitude,
-        longitude,
-        location: { type: 'Point', coordinates: [longitude, latitude] },
+        latitude: lat,
+        longitude: lng,
+        location: { type: 'Point', coordinates: [lng, lat] },
         licenseNumber,
-        status: 'pending',
+        status: 'active',
       });
     }
 
@@ -65,7 +78,7 @@ export const register = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful. Awaiting admin approval.',
+      message: 'Registration successful! You can now log in.',
       data: { user },
     });
   } catch (err) {

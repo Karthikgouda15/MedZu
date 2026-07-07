@@ -24,7 +24,9 @@ export const NotificationProvider = ({ children }) => {
   }, [user]);
 
   useEffect(() => {
-    fetchNotifications();
+    Promise.resolve().then(() => {
+      fetchNotifications();
+    });
   }, [fetchNotifications]);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotifications = () => {
   const ctx = useContext(NotificationContext);
   if (!ctx) throw new Error('useNotifications must be used within NotificationProvider');

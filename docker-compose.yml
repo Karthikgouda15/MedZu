@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+  # 1. MongoDB Database
   mongodb:
     image: mongo:7
     container_name: medzu-mongodb
@@ -7,6 +10,53 @@ services:
     volumes:
       - medzu_mongo_data:/data/db
     restart: unless-stopped
+    networks:
+      - medzu-network
+
+  # 2. Node.js Backend Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medzu-backend
+    ports:
+      - '5004:5004'
+    environment:
+      - PORT=5004
+      - MONGODB_URI=mongodb://mongodb:27017/medzu
+      - JWT_ACCESS_SECRET=medzu_access_secret_production_key_change_me
+      - JWT_REFRESH_SECRET=medzu_refresh_secret_production_key_change_me
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+      - CLIENT_URL=http://localhost
+      - PLATFORM_COMMISSION_PERCENT=5
+      - DEFAULT_DELIVERY_FEE=50
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    networks:
+      - medzu-network
+
+  # 3. React Frontend served via Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5004/api
+        - VITE_SOCKET_URL=http://localhost:5004
+    container_name: medzu-frontend
+    ports:
+      - '80:80'
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - medzu-network
 
 volumes:
   medzu_mongo_data:
+
+networks:
+  medzu-network:
+    driver: bridge

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Pill, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Pill, Eye, EyeOff, Lock, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 
 const DEMO_ACCOUNTS = [
-  { label: 'Admin', email: 'admin@medzu.com', password: 'admin123', color: 'from-purple-500 to-violet-500' },
-  { label: 'Pharmacy', email: 'pharmacy1@medzu.com', password: 'pharmacy123', color: 'from-primary-500 to-teal-500' },
-  { label: 'Distributor', email: 'distributor1@medzu.com', password: 'dist123', color: 'from-blue-500 to-indigo-500' },
+  { label: 'Admin', email: 'admin@medzu.com', password: 'admin123', color: 'from-rose-500 to-red-600' },
+  { label: 'Pharmacy', email: 'pharmacy1@medzu.com', password: 'pharmacy123', color: 'from-cyan-400 to-teal-500' },
+  { label: 'Distributor', email: 'distributor1@medzu.com', password: 'dist123', color: 'from-amber-400 to-orange-500' },
 ];
 
 export default function LoginPage() {
@@ -45,60 +45,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/30 to-teal-50/30 px-4">
-      {/* Background blobs */}
-      <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-primary-200 to-teal-200 opacity-30 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-gradient-to-br from-blue-200 to-indigo-200 opacity-20 blur-3xl" />
-
-      <div className="animate-fade-in-up relative w-full max-w-md">
-        <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-8 shadow-2xl shadow-slate-200/50 backdrop-blur-sm">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 shadow-xl shadow-primary-200">
-              <Pill className="h-7 w-7 text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 px-4 font-sans">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 shadow-lg">
+              <Pill className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900">Welcome back</h1>
-            <p className="mt-1 text-sm text-slate-500">Sign in to your MedZu account</p>
-          </div>
+            <span className="text-2xl font-bold text-white">MedZu</span>
+          </Link>
+          <h1 className="text-2xl font-bold text-white mb-2">Welcome back</h1>
+          <p className="text-slate-400">Sign in to your account</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Login Card */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/10 p-8 shadow-xl">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Email</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input-premium"
+                className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-slate-500 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 transition-all"
                 placeholder="you@example.com"
                 required
               />
             </div>
+
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-premium pr-10"
+                  className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 pr-12 text-white placeholder-slate-500 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 transition-all"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 text-base"
+              className="w-full rounded-xl bg-gradient-to-r from-primary-500 to-teal-500 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Signing in...
                 </div>
@@ -106,33 +109,28 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
-            Don&apos;t have an account?{' '}
-            <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+          <p className="mt-6 text-center text-sm text-slate-400">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-semibold text-primary-400 hover:text-primary-300 transition-colors">
               Register
             </Link>
           </p>
 
-          {/* Demo accounts */}
-          <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Quick Demo Access</p>
-            <div className="space-y-2">
-              {DEMO_ACCOUNTS.map((account, idx) => (
-                <div key={account.label} className="flex items-center gap-2">
-                  <button
-                    onClick={() => fillDemo(account)}
-                    className={`flex-1 rounded-xl bg-gradient-to-r ${account.color} px-3 py-2 text-left text-xs font-medium text-white shadow-sm transition-all hover:shadow-md hover:scale-[1.01]`}
-                  >
-                    {account.label}
-                  </button>
-                  <button
-                    onClick={() => copyToClipboard(`${account.email} / ${account.password}`, idx)}
-                    className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-400 transition-colors hover:text-slate-600"
-                    title="Copy credentials"
-                  >
-                    {copied === idx ? <Check className="h-3.5 w-3.5 text-primary-500" /> : <Copy className="h-3.5 w-3.5" />}
-                  </button>
-                </div>
+          {/* Demo Access */}
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <p className="text-xs font-semibold text-slate-400 mb-3 text-center uppercase tracking-wider">Demo Accounts</p>
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.label}
+                  type="button"
+                  onClick={() => fillDemo(account)}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-center transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                >
+                  <div className={`h-1 w-full rounded-t-lg bg-gradient-to-r ${account.color} mb-2`}></div>
+                  <span className="text-xs font-semibold text-slate-300 block">{account.label}</span>
+                  <span className="text-[10px] text-slate-500 block truncate">{account.email.split('@')[0]}</span>
+                </button>
               ))}
             </div>
           </div>
