@@ -10,6 +10,14 @@ import {
 import AnimatedCounter from '../components/AnimatedCounter';
 import api from '../services/api';
 
+const PRIMARY = '#0284c7';
+const PRIMARY_DARK = '#0369a1';
+const PRIMARY_LIGHT = '#38bdf8';
+const SECONDARY = '#0891b2';
+const ACCENT = '#f59e0b';
+const DARK = '#0f172a';
+const DARK_LIGHTER = '#1e293b';
+
 const HEADLINES = [
   { text: "Critical medicine out of stock?", sub: "Find nearby pharmacies with stock instantly." },
   { text: "Urgent patient prescription?", sub: "Procure and deliver it to your doorstep in minutes." },
@@ -193,7 +201,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
 
       {/* ─── Hero Section - Modern Abstract Design ─── */}
       <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
@@ -201,9 +209,9 @@ export default function LandingPage() {
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           {/* Gradient Orbs */}
-          <div className="absolute top-20 left-10 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }}></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }}></div>
+          <div className="absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: `radial-gradient(circle, ${PRIMARY}20, transparent 70%)`, animationDuration: '8s' }}></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: `radial-gradient(circle, ${SECONDARY}20, transparent 70%)`, animationDuration: '10s', animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl animate-pulse" style={{ background: `radial-gradient(circle, ${PRIMARY_LIGHT}15, transparent 60%)`, animationDuration: '12s', animationDelay: '4s' }}></div>
 
           {/* Grid Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -218,9 +226,9 @@ export default function LandingPage() {
           </div>
 
           {/* Floating Geometric Shapes */}
-          <div className="absolute top-32 right-20 w-20 h-20 border-2 border-primary-500/30 rotate-45 animate-float" style={{ animationDuration: '6s' }}></div>
-          <div className="absolute bottom-40 left-32 w-16 h-16 border-2 border-teal-500/30 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }}></div>
-          <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-primary-500/20 rotate-12 animate-float" style={{ animationDuration: '7s', animationDelay: '3s' }}></div>
+          <div className="absolute top-32 right-20 w-20 h-20 border-2 rotate-45 animate-float" style={{ borderColor: `${PRIMARY}40`, animationDuration: '6s' }}></div>
+          <div className="absolute bottom-40 left-32 w-16 h-16 border-2 rounded-full animate-float" style={{ borderColor: `${SECONDARY}40`, animationDuration: '8s', animationDelay: '1s' }}></div>
+          <div className="absolute top-1/3 right-1/4 w-12 h-12 rotate-12 animate-float" style={{ background: `${PRIMARY}20`, animationDuration: '7s', animationDelay: '3s' }}></div>
         </div>
 
         {/* Content Container */}
@@ -229,11 +237,11 @@ export default function LandingPage() {
           {/* Header Bar */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 shadow-lg shadow-primary-500/30">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl shadow-lg" style={{ background: PRIMARY }}>
                 <Pill className="h-5 w-5 text-white" />
               </div>
               <span className="text-2xl font-extrabold tracking-tight text-white">
-                Med<span className="text-primary-400">Zu</span>
+                MedZu
               </span>
             </div>
 
@@ -246,7 +254,8 @@ export default function LandingPage() {
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-teal-500 px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-primary-500/30 hover:scale-105"
+                className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg"
+                style={{ background: PRIMARY, boxShadow: `0 4px 12px ${PRIMARY}30` }}
               >
                 Sign Up
               </Link>
@@ -258,23 +267,23 @@ export default function LandingPage() {
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 text-sm font-medium mb-8 mx-auto">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full" style={{ background: PRIMARY }}></span>
               <span>Live Medicine Procurement Network</span>
             </div>
 
             {/* Animated Headline */}
             <div className="mb-6">
-              <h1 key={`headline-${headlineIndex}`} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight animate-fade-in-up">
+              <h1 key={`headline-${headlineIndex}`} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight">
                 {HEADLINES[headlineIndex].text}
               </h1>
             </div>
 
-            <p key={`sub-${headlineIndex}`} className="mt-4 text-lg sm:text-xl text-slate-300 font-medium animate-fade-in-up max-w-2xl mx-auto">
+            <p key={`sub-${headlineIndex}`} className="mt-4 text-lg sm:text-xl text-slate-300 font-medium max-w-2xl mx-auto">
               {HEADLINES[headlineIndex].sub}
             </p>
 
             {/* Search Bar */}
-            <div className="relative mt-12 max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-2 shadow-2xl">
+            <div className="relative mt-12 max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-2 shadow-xl">
               <div className="flex flex-1 items-center min-w-0 px-4">
                 <Search className="h-5 w-5 text-slate-400 mr-3 flex-shrink-0" />
                 <input
@@ -302,7 +311,8 @@ export default function LandingPage() {
 
                 <button
                   onClick={handleFindMedicines}
-                  className="rounded-xl bg-gradient-to-r from-primary-500 to-teal-500 px-6 py-3 text-sm sm:text-base font-bold text-white shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 hover:scale-105 transition-all"
+                  className="rounded-xl px-6 py-3 text-sm sm:text-base font-bold text-white shadow-lg hover:shadow-xl transition-all"
+                  style={{ background: PRIMARY, boxShadow: `0 4px 12px ${PRIMARY}30` }}
                 >
                   Find Medicines
                 </button>
@@ -314,13 +324,15 @@ export default function LandingPage() {
               <Link
                 to="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-bold hover:bg-white/20 transition-all"
+                style={{ backdropFilter: 'blur(12px)' }}
               >
                 <span>Register Pharmacy</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/register/distributor"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-transparent border-2 border-white/30 text-white text-sm font-bold hover:border-primary-400 hover:bg-primary-500/10 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-bold transition-all"
+                style={{ border: `2px solid ${PRIMARY}60`, background: `${PRIMARY}15`, backdropFilter: 'blur(12px)' }}
               >
                 <Truck className="h-4 w-4" />
                 <span>Become Partner</span>
@@ -371,8 +383,7 @@ export default function LandingPage() {
           {stats.map((stat, i) => (
             <div
               key={stat.label}
-              className="text-center animate-fade-in-up"
-              style={{ animationDelay: `${i * 100}ms` }}
+              className="text-center"
             >
               <p className="text-3xl sm:text-4xl font-extrabold text-slate-950">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={1400 + i * 200} />
@@ -389,19 +400,19 @@ export default function LandingPage() {
       <section className="bg-gradient-to-b from-slate-50 to-white py-24 relative overflow-hidden">
         {/* Abstract Background */}
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-100/50 to-teal-100/50"></div>
-          <div className="absolute top-20 right-20 w-64 h-64 bg-primary-200/30 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-20 w-64 h-64 bg-teal-200/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 left-0 w-full h-full" style={{ background: `linear-gradient(135deg, ${PRIMARY}10, ${SECONDARY}10)` }}></div>
+          <div className="absolute top-20 right-20 w-64 h-64 rounded-full blur-3xl" style={{ background: `${PRIMARY}20` }}></div>
+          <div className="absolute bottom-20 left-20 w-64 h-64 rounded-full blur-3xl" style={{ background: `${SECONDARY}20` }}></div>
         </div>
 
         <div className="mx-auto max-w-7xl px-6 relative z-10">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-bold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: `${PRIMARY}15`, color: PRIMARY_DARK, backdropFilter: 'blur(8px)' }}>
               <Zap className="h-4 w-4" />
               <span>Powerful Features</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-              Why Choose <span className="text-primary-600">MedZu</span>?
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: '-0.02em' }}>
+              Why Choose <span style={{ color: PRIMARY }}>MedZu</span>?
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
               Built for pharmacies, designed for speed. Experience the future of medicine procurement.
@@ -412,16 +423,13 @@ export default function LandingPage() {
             {FEATURES.map((feat, index) => (
               <div
                 key={feat.title}
-                className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 hover:-translate-y-2 border border-slate-100"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-slate-100"
               >
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-teal-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 <div className="relative">
                   {/* Icon Container */}
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                    <feat.icon className="h-8 w-8" />
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg mb-6" style={{ background: PRIMARY }}>
+                    <feat.icon className="h-7 w-7" />
                   </div>
 
                   <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary-600 transition-colors">
@@ -432,10 +440,6 @@ export default function LandingPage() {
                   </p>
 
                   {/* Arrow Indicator */}
-                  <div className="mt-6 flex items-center gap-2 text-primary-600 font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span>Learn More</span>
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
                 </div>
               </div>
             ))}
@@ -447,12 +451,12 @@ export default function LandingPage() {
       <section className="bg-gradient-to-b from-white to-slate-50 py-24 relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100 text-teal-700 text-sm font-bold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: `${SECONDARY}15`, color: SECONDARY, backdropFilter: 'blur(8px)' }}>
               <Clock className="h-4 w-4" />
               <span>Simple Process</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-              How It <span className="text-primary-600">Works</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: '-0.02em' }}>
+              How It <span style={{ color: PRIMARY }}>Works</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
               Get medicines delivered in 4 simple steps. From search to doorstep, we've streamlined the entire process.
@@ -461,20 +465,20 @@ export default function LandingPage() {
 
           <div className="relative">
             {/* Timeline Line */}
-            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 via-teal-500 to-emerald-500 rounded-full"></div>
+            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 rounded-full" style={{ background: PRIMARY }}></div>
 
             <div className="space-y-12">
               {HOW_IT_WORKS.map((item, index) => (
                 <div key={item.step} className={`relative flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}>
                   {/* Content Card */}
                   <div className={`w-full lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'}`}>
-                    <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 border border-slate-100 group">
+                    <div className="bg-white rounded-3xl p-8 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all duration-300 border border-slate-100">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style={{ background: PRIMARY }}>
                           <item.icon className="h-6 w-6" />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-primary-600 mb-1">STEP {item.step}</div>
+                          <div className="text-xs font-bold mb-1" style={{ color: PRIMARY }}>STEP {item.step}</div>
                           <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
                           <p className="text-slate-600 leading-relaxed">{item.desc}</p>
                         </div>
@@ -483,7 +487,7 @@ export default function LandingPage() {
                   </div>
 
                   {/* Center Dot */}
-                  <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-teal-500 items-center justify-center text-white font-black text-lg shadow-xl shadow-primary-300/50 z-10">
+                  <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full items-center justify-center text-white font-black text-lg shadow-md z-10" style={{ background: PRIMARY }}>
                     {index + 1}
                   </div>
 
@@ -512,11 +516,11 @@ export default function LandingPage() {
 
         <div className="mx-auto max-w-6xl px-6 relative z-10">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: `${PRIMARY}15`, color: PRIMARY_DARK, backdropFilter: 'blur(8px)' }}>
               <Shield className="h-4 w-4" />
               <span>Trusted & Secure</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: '-0.02em' }}>
               Built on Trust & Security
             </h2>
           </div>
@@ -525,14 +529,14 @@ export default function LandingPage() {
             {TRUST_BADGES.map((badge, index) => (
               <div
                 key={badge.text}
-                className="group relative bg-gradient-to-br from-slate-50 to-white rounded-2xl p-6 border border-slate-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-100/50 transition-all duration-300"
+                className="group relative bg-gradient-to-br from-slate-50 to-white rounded-2xl p-6 border border-slate-200 hover:shadow-lg transition-all duration-300"
+                style={{ borderColor: 'transparent' }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/0 to-teal-500/0 rounded-2xl group-hover:from-primary-500/5 group-hover:to-teal-500/5 transition-all duration-300"></div>
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-primary-300/50 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-md mb-4" style={{ background: PRIMARY }}>
                     <badge.icon className="h-7 w-7" />
                   </div>
-                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{badge.text}</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{badge.text}</h4>
                   <p className="text-xs text-slate-500 mt-1">{badge.sub}</p>
                 </div>
               </div>
@@ -544,8 +548,8 @@ export default function LandingPage() {
       {/* ─── Testimonials Section - Marquee Scrolling Animation ─── */}
       <section className="bg-gradient-to-b from-slate-50 to-white py-24 relative overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-100/50 to-teal-100/50 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-teal-100/50 to-emerald-100/50 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl" style={{ background: `radial-gradient(circle, ${PRIMARY}15, transparent 70%)` }}></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl" style={{ background: `radial-gradient(circle, ${SECONDARY}15, transparent 70%)` }}></div>
 
         <div className="mx-auto max-w-7xl px-6 relative z-10">
           <div className="text-center mb-16">
@@ -553,8 +557,8 @@ export default function LandingPage() {
               <Star className="h-4 w-4 fill-current" />
               <span>Customer Stories</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-              Trusted by <span className="text-primary-600">Pharmacies</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: '-0.02em' }}>
+              Trusted by <span style={{ color: PRIMARY }}>Pharmacies</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
               See what our partners say about their experience with MedZu.
@@ -574,10 +578,10 @@ export default function LandingPage() {
               {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map((testimonial, index) => (
                 <div
                   key={`${testimonial.name}-${index}`}
-                  className="flex-shrink-0 w-80 md:w-96 group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary-200/50 transition-all duration-500 border border-slate-100 hover:-translate-y-2"
+                  className="flex-shrink-0 w-80 md:w-96 group relative bg-white rounded-3xl p-8 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all duration-300 border border-slate-100"
                 >
                   {/* Quote Icon */}
-                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary-400 opacity-50">
+                  <div className="absolute top-6 right-6 w-8 h-8 rounded-full flex items-center justify-center opacity-50" style={{ background: `${PRIMARY}15`, color: PRIMARY }}>
                     <MessageSquare className="h-4 w-4" />
                   </div>
 
@@ -595,11 +599,11 @@ export default function LandingPage() {
 
                   {/* Author info */}
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-300/50 group-hover:scale-110 transition-transform">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-md" style={{ background: PRIMARY }}>
                       {testimonial.avatar}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{testimonial.name}</p>
+                      <p className="text-sm font-bold text-slate-900">{testimonial.name}</p>
                       <p className="text-xs text-slate-500">{testimonial.role}</p>
                     </div>
                   </div>
@@ -631,8 +635,8 @@ export default function LandingPage() {
               <MessageSquare className="h-4 w-4" />
               <span>Got Questions?</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
-              Frequently Asked <span className="text-primary-600">Questions</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900" style={{ letterSpacing: '-0.02em' }}>
+              Frequently Asked <span style={{ color: PRIMARY }}>Questions</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto text-lg">
               Everything you need to know about MedZu.
@@ -643,20 +647,22 @@ export default function LandingPage() {
             {FAQS.map((faq, index) => (
               <div
                 key={index}
-                className={`group relative bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ${expandedFaq === index ? 'shadow-xl shadow-primary-100/50 border-primary-300' : 'hover:border-primary-200 hover:shadow-lg'}`}
+                className={`group relative bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ${expandedFaq === index ? 'shadow-xl border-primary-300' : 'hover:border-primary-200 hover:shadow-lg'}`}
+                style={{ boxShadow: expandedFaq === index ? `0 4px 24px ${PRIMARY}18` : undefined }}
               >
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
                   className="w-full flex items-center justify-between p-6 text-left"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${expandedFaq === index ? 'bg-primary-500 text-white' : 'bg-slate-200 text-slate-600 group-hover:bg-primary-100 group-hover:text-primary-600'}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${expandedFaq === index ? 'text-white' : 'bg-slate-200 text-slate-600 group-hover:bg-primary-100 group-hover:text-primary-600'}`} style={{ background: expandedFaq === index ? PRIMARY : undefined }}>
                       <span className="font-bold text-sm">{index + 1}</span>
                     </div>
                     <span className="font-bold text-slate-900 pr-4 group-hover:text-primary-600 transition-colors">{faq.q}</span>
                   </div>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 flex-shrink-0 transition-transform ${expandedFaq === index ? 'rotate-180 text-primary-600' : ''}`}
+                    className={`h-5 w-5 text-slate-400 flex-shrink-0 transition-transform ${expandedFaq === index ? 'rotate-180' : ''}`}
+                    style={{ color: expandedFaq === index ? PRIMARY : undefined }}
                   />
                 </button>
                 {expandedFaq === index && (
@@ -675,14 +681,14 @@ export default function LandingPage() {
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-20 left-20 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }}></div>
-            <div className="absolute bottom-20 right-20 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }}></div>
+            <div className="absolute top-20 left-20 w-64 h-64 rounded-full blur-3xl animate-pulse" style={{ background: `${PRIMARY}15`, animationDuration: '8s' }}></div>
+            <div className="absolute bottom-20 right-20 w-64 h-64 rounded-full blur-3xl animate-pulse" style={{ background: `${SECONDARY}15`, animationDuration: '10s', animationDelay: '2s' }}></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full blur-3xl animate-pulse" style={{ background: `${PRIMARY_LIGHT}10`, animationDuration: '12s', animationDelay: '4s' }}></div>
           </div>
 
           {/* Floating Elements */}
-          <div className="absolute top-32 right-32 w-16 h-16 border-2 border-primary-500/20 rotate-45 animate-float" style={{ animationDuration: '6s' }}></div>
-          <div className="absolute bottom-32 left-32 w-12 h-12 border-2 border-teal-500/20 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }}></div>
+          <div className="absolute top-32 right-32 w-16 h-16 border-2 rotate-45 animate-float" style={{ borderColor: `${PRIMARY}30`, animationDuration: '6s' }}></div>
+          <div className="absolute bottom-32 left-32 w-12 h-12 border-2 rounded-full animate-float" style={{ borderColor: `${SECONDARY}30`, animationDuration: '8s', animationDelay: '1s' }}></div>
         </div>
 
         <div className="mx-auto max-w-6xl px-6 relative z-10">
@@ -693,8 +699,8 @@ export default function LandingPage() {
                 <Zap className="h-4 w-4" />
                 <span>Mobile Experience</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight mb-6">
-                Medicines in Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-teal-400">Pocket</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight mb-6" style={{ letterSpacing: '-0.02em' }}>
+                Medicines in Your Pocket
               </h2>
               <p className="text-lg text-slate-300 leading-relaxed mb-8 max-w-xl">
                 Connect your pharmacy to nearby inventory hubs, place lightning-fast procurement requests, and monitor delivery riders in real-time. Everything is just one tap away.
@@ -729,7 +735,7 @@ export default function LandingPage() {
               {/* Phone Frame */}
               <div className="relative w-64 h-[500px] bg-gradient-to-br from-slate-700 to-slate-800 rounded-[3rem] border-4 border-slate-600 shadow-2xl overflow-hidden">
                 {/* Screen */}
-                <div className="absolute inset-2 bg-gradient-to-br from-primary-500/20 to-teal-500/20 rounded-[2.5rem] overflow-hidden">
+                <div className="absolute inset-2 rounded-[2.5rem] overflow-hidden" style={{ background: `${PRIMARY}15` }}>
                   {/* Abstract App UI */}
                   <div className="absolute inset-0 p-6 flex flex-col">
                     {/* Header */}
@@ -737,7 +743,7 @@ export default function LandingPage() {
                       <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                         <Pill className="h-5 w-5 text-white" />
                       </div>
-                      <div className="px-3 py-1 rounded-full bg-emerald-500/30 backdrop-blur-sm border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                      <div className="px-3 py-1 rounded-full backdrop-blur-sm border text-xs font-bold" style={{ background: `${PRIMARY}30`, borderColor: `${PRIMARY}50`, color: 'white' }}>
                         LIVE
                       </div>
                     </div>
@@ -757,12 +763,12 @@ export default function LandingPage() {
 
                       {/* Location Pins */}
                       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg animate-bounce">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg animate-bounce" style={{ background: PRIMARY }}>
                           <Truck className="h-4 w-4 text-white" />
                         </div>
                       </div>
                       <div className="absolute bottom-1/4 left-1/4">
-                        <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center shadow-lg">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg" style={{ background: SECONDARY }}>
                           <Pill className="h-3 w-3 text-white" />
                         </div>
                       </div>
@@ -770,7 +776,7 @@ export default function LandingPage() {
 
                     {/* Status Card */}
                     <div className="w-full h-16 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center gap-3 p-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center animate-pulse">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center animate-pulse" style={{ background: PRIMARY }}>
                         <Activity className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1">
@@ -778,20 +784,13 @@ export default function LandingPage() {
                         <div className="h-2 w-1/2 bg-white/20 rounded"></div>
                       </div>
                       <div className="text-right">
-                        <div className="text-emerald-400 font-black">4m</div>
+                        <div className="font-black" style={{ color: 'white' }}>4m</div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating Elements Around Phone */}
-              <div className="absolute -top-4 -right-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center text-white shadow-xl animate-float" style={{ animationDuration: '4s' }}>
-                <Activity className="h-6 w-6" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white animate-float" style={{ animationDuration: '5s', animationDelay: '1s' }}>
-                <MapPin className="h-5 w-5" />
-              </div>
             </div>
           </div>
         </div>
@@ -800,7 +799,7 @@ export default function LandingPage() {
       {/* ─── Final CTA Section - Modern Design ─── */}
       <section className="relative py-32 overflow-hidden">
         {/* Dynamic Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-teal-600 to-emerald-600"></div>
+        <div className="absolute inset-0" style={{ background: PRIMARY_DARK }}></div>
 
         {/* Animated Pattern */}
         <div className="absolute inset-0 opacity-20">
@@ -827,9 +826,9 @@ export default function LandingPage() {
             <span>Join the Network</span>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight" style={{ letterSpacing: '-0.02em' }}>
             Ready to Transform<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">Your Pharmacy?</span>
+            Your Pharmacy?
           </h2>
 
           <p className="text-lg sm:text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
@@ -839,16 +838,17 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
             <Link
               to="/register"
-              className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-white text-primary-600 font-bold text-lg hover:bg-slate-50 transition-all shadow-2xl hover:shadow-3xl hover:-translate-y-1"
+              className="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-white font-bold text-lg hover:bg-slate-50 transition-all shadow-lg"
+              style={{ color: PRIMARY_DARK }}
             >
               <span>Join as Pharmacy</span>
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-5 w-5" />
             </Link>
             <Link
               to="/register/distributor"
-              className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-transparent border-2 border-white text-white font-bold text-lg hover:bg-white/10 transition-all hover:border-white/50"
+              className="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-transparent border-2 border-white text-white font-bold text-lg hover:bg-white/10 transition-all"
             >
-              <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <Truck className="h-5 w-5" />
               <span>Become a Partner</span>
             </Link>
           </div>
@@ -877,7 +877,7 @@ export default function LandingPage() {
           <div className="grid gap-10 md:grid-cols-4 pb-12 border-b border-slate-800">
             <div>
               <div className="flex items-center gap-2 text-white">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-teal-500">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg" style={{ background: PRIMARY }}>
                   <Pill className="h-4.5 w-4.5 text-white" />
                 </div>
                 <span className="text-xl font-extrabold text-white">MedZu</span>
